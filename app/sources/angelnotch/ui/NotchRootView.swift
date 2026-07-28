@@ -15,7 +15,7 @@ struct NotchRootView: View {
       islandShape
 
       if model.isExpanded {
-        ExpandedClipboardView(model: model)
+        ExpandedFeaturesView(model: model)
           .transition(
             .asymmetric(
               insertion: .opacity.combined(
@@ -92,7 +92,7 @@ private struct CompactFoundationView: View {
   }
 }
 
-private struct ExpandedClipboardView: View {
+private struct ExpandedFeaturesView: View {
   @ObservedObject var model: NotchModel
   @ObservedObject var settings: AppSettings
 
@@ -161,6 +161,8 @@ private struct ExpandedClipboardView: View {
       FoundationHomePanel()
     case .clipboard:
       ClipboardPanel(store: model.clipboard)
+    case .files:
+      FileShelfPanel(store: model.files)
     }
   }
 
@@ -184,7 +186,7 @@ private struct FoundationHomePanel: View {
         .font(LoopDesign.TypeStyle.display)
         .foregroundStyle(LoopDesign.Palette.textPrimary)
 
-      Text("Clipboard history is ready.")
+      Text("Clipboard history and the file shelf are ready.")
         .font(LoopDesign.TypeStyle.label)
         .foregroundStyle(LoopDesign.Palette.textSecondary)
 
@@ -363,6 +365,23 @@ struct LoopTextButtonStyle: ButtonStyle {
       .foregroundStyle(LoopDesign.Palette.accent)
       .scaleEffect(configuration.isPressed ? 0.98 : 1)
       .interactiveCursor()
+  }
+}
+
+struct FileAction: View {
+  let symbol: String
+  let action: () -> Void
+
+  var body: some View {
+    Button(action: action) {
+      Image(systemName: symbol)
+        .font(.system(size: 10, weight: .semibold))
+        .frame(width: 25, height: 25)
+        .background(LoopDesign.Palette.surface, in: Circle())
+    }
+    .buttonStyle(.plain)
+    .foregroundStyle(LoopDesign.Palette.textSecondary)
+    .interactiveCursor()
   }
 }
 

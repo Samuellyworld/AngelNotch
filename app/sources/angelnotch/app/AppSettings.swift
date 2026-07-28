@@ -109,6 +109,7 @@ final class AppSettings: ObservableObject {
 
 struct AngelNotchSettingsView: View {
   @ObservedObject var settings: AppSettings
+  @ObservedObject var files: FileShelfStore
 
   var body: some View {
     Form {
@@ -165,6 +166,16 @@ struct AngelNotchSettingsView: View {
 
       Section("Widgets") {
         Toggle("Clipboard history", isOn: $settings.enableClipboard)
+      }
+
+      Section("File shelf") {
+        Picker("Automatic cleanup", selection: $files.cleanupAfterDays) {
+          Text("After 1 day").tag(1)
+          Text("After 7 days").tag(7)
+          Text("After 14 days").tag(14)
+          Text("After 30 days").tag(30)
+          Text("After 90 days").tag(90)
+        }
       }
 
       Section("Global shortcuts") {
