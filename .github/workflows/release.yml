@@ -147,12 +147,26 @@ jobs:
         run: |
           artifact="dist/AngelNotch-$VERSION-macos.dmg"
           checksum="$artifact.sha256"
+          stable_artifact="dist/AngelNotch-macos.dmg"
+          stable_checksum="$stable_artifact.sha256"
 
+          cp "$artifact" "$stable_artifact"
+          checksum_value="$(shasum -a 256 "$stable_artifact" | awk '{ print $1 }')"
+          printf '%s  %s\n' \
+            "$checksum_value" \
+            "$(basename "$stable_artifact")" \
+            > "$stable_checksum"
+
+          assets=(
+            "$artifact"
+            "$checksum"
+            "$stable_artifact"
+            "$stable_checksum"
+          )
           if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
             gh release upload \
               "$RELEASE_TAG" \
-              "$artifact" \
-              "$checksum" \
+              "${assets[@]}" \
               --clobber
             gh release edit \
               "$RELEASE_TAG" \
@@ -162,8 +176,7 @@ jobs:
           else
             gh release create \
               "$RELEASE_TAG" \
-              "$artifact" \
-              "$checksum" \
+              "${assets[@]}" \
               --title "AngelNotch $VERSION" \
               --generate-notes \
               --latest \

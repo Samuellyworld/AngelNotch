@@ -13,9 +13,8 @@ export const AUTHOR_URL = "https://github.com/Samuellyworld";
 
 export const MIN_MACOS = "macOS 14";
 
-/** The signed build served straight from the site, with the releases page kept
- *  alongside it for older versions and checksums. */
-export const DOWNLOAD_URL = "AngelNotch-macos.dmg";
+/** The release workflow refreshes this stable asset on every tagged release. */
+export const DOWNLOAD_URL = `${REPO_URL}/releases/latest/download/AngelNotch-macos.dmg`;
 export const DOWNLOAD_NAME = "AngelNotch-macos.dmg";
 export const DOWNLOAD_SIZE = "1.4 MB";
 
