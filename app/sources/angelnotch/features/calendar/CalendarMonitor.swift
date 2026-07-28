@@ -57,15 +57,12 @@ final class CalendarMonitor: ObservableObject {
   }
 
   func requestAccess() {
-    Task { @MainActor [weak self] in
-      guard let self else { return }
-      do {
-        _ = try await store.requestFullAccessToEvents()
-      } catch {
-        // The authorization status below remains the source of truth.
+    store.requestFullAccessToEvents { [weak self] _, _ in
+      Task { @MainActor [weak self] in
+        guard let self else { return }
+        self.authorizationStatus = EKEventStore.authorizationStatus(for: .event)
+        self.refresh()
       }
-      authorizationStatus = EKEventStore.authorizationStatus(for: .event)
-      refresh()
     }
   }
 

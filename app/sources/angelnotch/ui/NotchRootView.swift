@@ -414,31 +414,36 @@ struct AnimatedWaveform: View {
   let isPlaying: Bool
   let reducedMotion: Bool
 
+  private var cadence: AnimationTimelineSchedule {
+    .animation(
+      minimumInterval: reducedMotion ? 1 : 0.11,
+      paused: !isPlaying || reducedMotion
+    )
+  }
+
   var body: some View {
-    TimelineView(
-      .animation(
-        minimumInterval: reducedMotion ? 1 : 0.11,
-        paused: !isPlaying || reducedMotion
-      )
-    ) { context in
-      let time = context.date.timeIntervalSinceReferenceDate
-      HStack(spacing: 2) {
-        ForEach(0..<5, id: \.self) { index in
-          let wave = abs(
-            sin(time * (2.5 + Double(index) * 0.31) + Double(index) * 0.9)
-          )
-          Capsule()
-            .fill(color)
-            .frame(
-              width: 2.5,
-              height: reducedMotion ? 10 : 5 + wave * 13
-            )
-        }
-      }
-      .animation(.linear(duration: 0.10), value: time)
+    TimelineView(cadence) { context in
+      waveform(at: context.date.timeIntervalSinceReferenceDate)
     }
     .frame(width: 24, height: 20)
     .accessibilityLabel(isPlaying ? "Playing" : "Paused")
+  }
+
+  private func waveform(at time: TimeInterval) -> some View {
+    HStack(spacing: 2) {
+      ForEach(0..<5, id: \.self) { index in
+        Capsule()
+          .fill(color)
+          .frame(width: 2.5, height: barHeight(for: index, at: time))
+      }
+    }
+    .animation(.linear(duration: 0.10), value: time)
+  }
+
+  private func barHeight(for index: Int, at time: TimeInterval) -> CGFloat {
+    guard !reducedMotion else { return 10 }
+    let phase = time * (2.5 + Double(index) * 0.31) + Double(index) * 0.9
+    return CGFloat(5 + abs(sin(phase)) * 13)
   }
 }
 

@@ -137,7 +137,7 @@ final class FileShelfStore: NSObject, ObservableObject {
 }
 
 @MainActor
-private final class FilePreviewController: NSObject, @MainActor QLPreviewPanelDataSource {
+private final class FilePreviewController: NSObject, QLPreviewPanelDataSource {
   private var previewURL: URL?
 
   func present(_ url: URL) {
@@ -148,14 +148,18 @@ private final class FilePreviewController: NSObject, @MainActor QLPreviewPanelDa
     panel.makeKeyAndOrderFront(nil)
   }
 
-  func numberOfPreviewItems(in panel: QLPreviewPanel!) -> Int {
-    previewURL == nil ? 0 : 1
+  nonisolated func numberOfPreviewItems(in panel: QLPreviewPanel!) -> Int {
+    MainActor.assumeIsolated {
+      previewURL == nil ? 0 : 1
+    }
   }
 
-  func previewPanel(
+  nonisolated func previewPanel(
     _ panel: QLPreviewPanel!,
     previewItemAt index: Int
   ) -> (any QLPreviewItem)! {
-    previewURL as NSURL?
+    MainActor.assumeIsolated {
+      previewURL as NSURL?
+    }
   }
 }
