@@ -1,0 +1,14 @@
+{
+  "name": "angelnotch-chrome-extension",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Typed YouTube and Chrome download bridge for AngelNotch.",
+  "scripts": {
+    "build": "tsc --project tsconfig.json",
+    "check": "tsc --project tsconfig.json --noEmit"
+  },
+  "devDependencies": {
+    "@types/chrome": "^0.0.326",
+    "typescript": "^5.9.2"
+  }
+}

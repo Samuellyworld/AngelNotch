@@ -24,6 +24,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
       return
     }
 
+    NativeMessagingInstaller.installIfAvailable()
     NSApp.setActivationPolicy(.accessory)
 
     let coordinator = NotchCoordinator()

@@ -8,7 +8,8 @@ let package = Package(
     .macOS(.v14)
   ],
   products: [
-    .executable(name: "AngelNotch", targets: ["AngelNotch"])
+    .executable(name: "AngelNotch", targets: ["AngelNotch"]),
+    .executable(name: "AngelNotchNativeHost", targets: ["AngelNotchNativeHost"]),
   ],
   targets: [
     .executableTarget(
@@ -23,6 +24,10 @@ let package = Package(
       linkerSettings: [
         .linkedFramework("ServiceManagement")
       ]
+    ),
+    .executableTarget(
+      name: "AngelNotchNativeHost",
+      path: "sources/angelnotch-native-host"
     ),
   ]
 )

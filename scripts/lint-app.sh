@@ -9,5 +9,6 @@ swift format lint --recursive app/sources
 find app/sources/angelnotch -name '*.swift' -print0 \
   | sort -z \
   | xargs -0 swiftc -frontend -parse
+swiftc -frontend -parse app/sources/angelnotch-native-host/main.swift
 
 echo "AngelNotch Swift lint passed."

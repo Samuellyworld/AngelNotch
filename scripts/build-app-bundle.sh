@@ -9,6 +9,8 @@ SWIFT_BUILD_DIR="$PROJECT_DIR/.build"
 
 cd "$PROJECT_DIR"
 
+# Build products are not installed applications, so keep them in a hidden
+# staging directory that Spotlight does not present as a second AngelNotch.
 mkdir -p "$PROJECT_DIR/dist/.build"
 
 swift build \
@@ -28,6 +30,9 @@ mkdir -p \
 install -m 755 \
   "$SWIFT_BUILD_DIR/release/AngelNotch" \
   "$CONTENTS_DIR/MacOS/AngelNotch"
+install -m 755 \
+  "$SWIFT_BUILD_DIR/release/AngelNotchNativeHost" \
+  "$CONTENTS_DIR/MacOS/AngelNotchNativeHost"
 install -m 644 "resources/info.plist" "$CONTENTS_DIR/Info.plist"
 install -m 644 \
   "resources/app-icon.icns" \
@@ -37,12 +42,18 @@ install -m 644 \
   app/resources/media/break-complete-idera.mp3 \
   "$CONTENTS_DIR/Resources/media/"
 
-strip -x -S "$CONTENTS_DIR/MacOS/AngelNotch"
-if LC_ALL=C strings "$CONTENTS_DIR/MacOS/AngelNotch" \
-  | grep -E '/Users/[^/]+/|/home/[^/]+' >/dev/null
-then
-  echo "Refusing to package an executable containing a local user path." >&2
-  exit 1
-fi
+for executable in \
+  "$CONTENTS_DIR/MacOS/AngelNotch" \
+  "$CONTENTS_DIR/MacOS/AngelNotchNativeHost"
+do
+  strip -x -S "$executable"
+  if LC_ALL=C strings "$executable" \
+    | grep -E '/Users/[^/]+/|/home/[^/]+/' >/dev/null
+  then
+    echo "Refusing to package an executable containing a local user path:" >&2
+    echo "  $executable" >&2
+    exit 1
+  fi
+done
 
 echo "Assembled unsigned app: $APP_DIR"
