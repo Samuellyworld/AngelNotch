@@ -1,0 +1,30 @@
+.DS_Store
+.swiftpm/
+.build/
+dist/
+.vscode/
+chrome-extension/node_modules/
+chrome-extension/dist/
+scripts/__pycache__/
+
+# Local configuration and signing material
+.env
+.env.*
+!.env.example
+*.key
+*.p8
+*.p12
+*.pem
+*.mobileprovision
+*.provisionprofile
+
+# Website dependencies and generated output
+web/node_modules/
+web/dist/
+/node_modules/
+
+# Local media preparation inputs and caches
+web/.media-cache/
+web/raw/
+web/angelnotch-*.png
+web/vite.config.ts.timestamp-*.mjs
