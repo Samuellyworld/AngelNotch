@@ -4,6 +4,7 @@ enum IslandTab: String, CaseIterable, Identifiable {
   case home
   case clipboard
   case files
+  case focus
 
   var id: String { rawValue }
 
@@ -12,6 +13,7 @@ enum IslandTab: String, CaseIterable, Identifiable {
     case .home: "Home"
     case .clipboard: "Clipboard"
     case .files: "Files"
+    case .focus: "Focus"
     }
   }
 }
@@ -26,6 +28,7 @@ final class NotchModel: ObservableObject {
   let settings = AppSettings()
   let clipboard = ClipboardHistoryStore()
   let files = FileShelfStore()
+  let focus = FocusTimer()
 
   private var collapseTask: Task<Void, Never>?
 

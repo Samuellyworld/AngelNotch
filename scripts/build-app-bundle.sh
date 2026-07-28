@@ -24,7 +24,7 @@ fi
 rm -rf -- "$APP_DIR"
 mkdir -p \
   "$CONTENTS_DIR/MacOS" \
-  "$CONTENTS_DIR/Resources"
+  "$CONTENTS_DIR/Resources/media"
 install -m 755 \
   "$SWIFT_BUILD_DIR/release/AngelNotch" \
   "$CONTENTS_DIR/MacOS/AngelNotch"
@@ -32,6 +32,10 @@ install -m 644 "resources/info.plist" "$CONTENTS_DIR/Info.plist"
 install -m 644 \
   "resources/app-icon.icns" \
   "$CONTENTS_DIR/Resources/AngelNotchMark.icns"
+install -m 644 \
+  app/resources/media/focus-complete-idera.mp3 \
+  app/resources/media/break-complete-idera.mp3 \
+  "$CONTENTS_DIR/Resources/media/"
 
 strip -x -S "$CONTENTS_DIR/MacOS/AngelNotch"
 if LC_ALL=C strings "$CONTENTS_DIR/MacOS/AngelNotch" \

@@ -109,6 +109,7 @@ final class AppSettings: ObservableObject {
 
 struct AngelNotchSettingsView: View {
   @ObservedObject var settings: AppSettings
+  @ObservedObject var focus: FocusTimer
   @ObservedObject var files: FileShelfStore
 
   var body: some View {
@@ -178,6 +179,30 @@ struct AngelNotchSettingsView: View {
         }
       }
 
+      Section("Focus timer") {
+        Toggle(
+          "Announce with the Idera voice",
+          isOn: $focus.completionSoundEnabled
+        )
+        Stepper(
+          "Focus: \(focus.focusMinutes) minutes",
+          value: $focus.focusMinutes,
+          in: 5...90,
+          step: 5
+        )
+        Stepper(
+          "Short break: \(focus.shortBreakMinutes) minutes",
+          value: $focus.shortBreakMinutes,
+          in: 1...30
+        )
+        Stepper(
+          "Long break: \(focus.longBreakMinutes) minutes",
+          value: $focus.longBreakMinutes,
+          in: 5...45,
+          step: 5
+        )
+      }
+
       Section("Global shortcuts") {
         LabeledContent("Open AngelNotch", value: "⌥ Space")
         LabeledContent("Clipboard history", value: "⌃⌥ V")
@@ -185,7 +210,7 @@ struct AngelNotchSettingsView: View {
     }
     .formStyle(.grouped)
     .padding()
-    .frame(width: 500, height: 480)
+    .frame(width: 500, height: 680)
     .preferredColorScheme(.dark)
   }
 }

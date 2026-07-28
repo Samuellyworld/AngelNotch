@@ -90,6 +90,7 @@ final class NotchCoordinator {
 
     let view = AngelNotchSettingsView(
       settings: model.settings,
+      focus: model.focus,
       files: model.files
     )
     let controller = NSHostingController(rootView: view)
@@ -97,7 +98,7 @@ final class NotchCoordinator {
     window.title = "AngelNotch Settings"
     window.appearance = NSAppearance(named: .darkAqua)
     window.styleMask = [.titled, .closable, .miniaturizable]
-    window.setContentSize(NSSize(width: 500, height: 480))
+    window.setContentSize(NSSize(width: 500, height: 680))
     window.center()
     window.isReleasedWhenClosed = false
     window.makeKeyAndOrderFront(nil)
