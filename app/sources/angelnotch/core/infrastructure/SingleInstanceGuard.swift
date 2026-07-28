@@ -2,7 +2,7 @@ import AppKit
 import Darwin
 import Foundation
 
-/// keeps one AngelNotch process alive across app copies and release locations.
+/// Keeps one AngelNotch process alive across app copies and release locations.
 @MainActor
 final class SingleInstanceGuard {
   private var lockFileDescriptor: Int32 = -1
@@ -17,7 +17,7 @@ final class SingleInstanceGuard {
       S_IRUSR | S_IWUSR
     )
 
-    // failing open is safer than making the app unusable because its data
+    // Failing open is safer than making the app unusable because its data
     // directory is temporarily unavailable.
     guard fileDescriptor >= 0 else { return true }
 

@@ -24,10 +24,10 @@ enum AccentChoice: String, CaseIterable, Identifiable {
   var color: Color {
     switch self {
     case .spectrum: LoopDesign.Palette.accent
-    case .cyan: Color(red: 0.52, green: 0.70, blue: 0.70)
-    case .coral: LoopDesign.Palette.accent
-    case .violet: Color(red: 0.64, green: 0.58, blue: 0.73)
-    case .mint: Color(red: 0.58, green: 0.70, blue: 0.62)
+    case .cyan: LoopDesign.Palette.cyan
+    case .coral: LoopDesign.Palette.coral
+    case .violet: LoopDesign.Palette.violet
+    case .mint: LoopDesign.Palette.mint
     }
   }
 }
@@ -43,11 +43,20 @@ final class AppSettings: ObservableObject {
   @Published var accent: AccentChoice {
     didSet { defaults.set(accent.rawValue, forKey: "appearance.accent") }
   }
+  @Published var autoExpandMedia: Bool {
+    didSet { defaults.set(autoExpandMedia, forKey: "features.autoExpandMedia") }
+  }
   @Published var enableClipboard: Bool {
     didSet { defaults.set(enableClipboard, forKey: "features.clipboard") }
   }
+  @Published var enableSystemHUDs: Bool {
+    didSet { defaults.set(enableSystemHUDs, forKey: "features.systemHUDs") }
+  }
   @Published var enableCalendar: Bool {
     didSet { defaults.set(enableCalendar, forKey: "features.calendar") }
+  }
+  @Published var enableContextModes: Bool {
+    didSet { defaults.set(enableContextModes, forKey: "features.contextModes") }
   }
   @Published var enableReducedMotion: Bool {
     didSet { defaults.set(enableReducedMotion, forKey: "appearance.reducedMotion") }
@@ -60,27 +69,32 @@ final class AppSettings: ObservableObject {
   init() {
     let scale = defaults.double(forKey: "appearance.islandScale")
     islandScale = scale == 0 ? 1 : scale
-
     let speed = defaults.double(forKey: "appearance.animationSpeed")
     animationSpeed = speed == 0 ? 1 : speed
-
     accent =
       AccentChoice(
         rawValue: defaults.string(forKey: "appearance.accent") ?? ""
       ) ?? .spectrum
 
+    autoExpandMedia =
+      defaults.object(forKey: "features.autoExpandMedia") as? Bool
+      ?? true
     enableClipboard =
       defaults.object(forKey: "features.clipboard") as? Bool
+      ?? true
+    enableSystemHUDs =
+      defaults.object(forKey: "features.systemHUDs") as? Bool
       ?? true
     enableCalendar =
       defaults.object(forKey: "features.calendar") as? Bool
       ?? true
-
+    enableContextModes =
+      defaults.object(forKey: "features.contextModes") as? Bool
+      ?? true
     enableReducedMotion =
       defaults.object(
         forKey: "appearance.reducedMotion"
       ) as? Bool ?? false
-
     launchAtLogin = ANLaunchAtLoginIsEnabled()
   }
 
@@ -173,17 +187,10 @@ struct AngelNotchSettingsView: View {
 
       Section("Widgets") {
         Toggle("Clipboard history", isOn: $settings.enableClipboard)
+        Toggle("System HUDs", isOn: $settings.enableSystemHUDs)
         Toggle("Calendar", isOn: $settings.enableCalendar)
-      }
-
-      Section("File shelf") {
-        Picker("Automatic cleanup", selection: $files.cleanupAfterDays) {
-          Text("After 1 day").tag(1)
-          Text("After 7 days").tag(7)
-          Text("After 14 days").tag(14)
-          Text("After 30 days").tag(30)
-          Text("After 90 days").tag(90)
-        }
+        Toggle("Context modes", isOn: $settings.enableContextModes)
+        Toggle("Expand for track changes", isOn: $settings.autoExpandMedia)
       }
 
       Section("Focus timer") {
@@ -210,9 +217,20 @@ struct AngelNotchSettingsView: View {
         )
       }
 
+      Section("File shelf") {
+        Picker("Automatic cleanup", selection: $files.cleanupAfterDays) {
+          Text("After 1 day").tag(1)
+          Text("After 7 days").tag(7)
+          Text("After 14 days").tag(14)
+          Text("After 30 days").tag(30)
+          Text("After 90 days").tag(90)
+        }
+      }
+
       Section("Global shortcuts") {
         LabeledContent("Open AngelNotch", value: "⌥ Space")
         LabeledContent("Clipboard history", value: "⌃⌥ V")
+        LabeledContent("Screenshot", value: "⌃⌥ S")
       }
     }
     .formStyle(.grouped)

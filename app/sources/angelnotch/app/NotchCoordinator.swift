@@ -40,6 +40,15 @@ final class NotchCoordinator {
       }
       .store(in: &subscriptions)
 
+    model.settings.$islandScale
+      .combineLatest(model.settings.$animationSpeed)
+      .dropFirst()
+      .sink { [weak self] _, _ in
+        guard let self else { return }
+        movePanel(expanded: model.isExpanded, animated: true)
+      }
+      .store(in: &subscriptions)
+
     model.settings.$enableClipboard
       .dropFirst()
       .sink { [weak self] enabled in
@@ -70,12 +79,54 @@ final class NotchCoordinator {
       }
       .store(in: &subscriptions)
 
-    model.settings.$islandScale
-      .combineLatest(model.settings.$animationSpeed)
+    model.settings.$enableContextModes
       .dropFirst()
-      .sink { [weak self] _, _ in
+      .sink { [weak self] enabled in
         guard let self else { return }
-        movePanel(expanded: model.isExpanded, animated: true)
+        if enabled {
+          model.context.start()
+        } else {
+          model.context.stop()
+        }
+      }
+      .store(in: &subscriptions)
+
+    model.$selectedTab
+      .removeDuplicates()
+      .dropFirst()
+      .sink { [weak self] _ in
+        guard let self, self.model.isExpanded else { return }
+        movePanel(expanded: true, animated: true)
+      }
+      .store(in: &subscriptions)
+
+    model.media.$snapshot
+      .map { $0 != nil }
+      .removeDuplicates()
+      .dropFirst()
+      .sink { [weak self] _ in
+        guard let self, self.model.isExpanded else { return }
+        movePanel(expanded: true, animated: true)
+      }
+      .store(in: &subscriptions)
+
+    model.media.$snapshot
+      .compactMap { $0 }
+      .removeDuplicates(by: {
+        $0.trackID == $1.trackID
+          && $0.isPlaying == $1.isPlaying
+      })
+      .dropFirst()
+      .sink { [weak self] snapshot in
+        guard snapshot.isPlaying else { return }
+        self?.model.presentMediaTemporarily()
+      }
+      .store(in: &subscriptions)
+
+    model.system.$latestHUD
+      .compactMap { $0 }
+      .sink { [weak self] event in
+        self?.model.presentHUD(event)
       }
       .store(in: &subscriptions)
 
@@ -130,6 +181,8 @@ final class NotchCoordinator {
         model.toggleExpanded()
       case .showClipboard:
         showAndExpand(tab: .clipboard)
+      case .screenshot:
+        model.takeScreenshot()
       }
     }
     hotKeys.registerDefaults()
@@ -142,7 +195,7 @@ final class NotchCoordinator {
       expanded
       ? NSSize(
         width: LoopDesign.Geometry.expandedWidth * scale,
-        height: LoopDesign.Geometry.expandedHeight * scale
+        height: expandedHeight() * scale
       )
       : NSSize(
         width: compactWidth(for: screen) * scale,
@@ -170,6 +223,13 @@ final class NotchCoordinator {
     }
   }
 
+  private func expandedHeight() -> CGFloat {
+    if model.selectedTab == .home, model.media.snapshot != nil {
+      return LoopDesign.Geometry.mediaExpandedHeight
+    }
+    return LoopDesign.Geometry.expandedHeight
+  }
+
   private func targetScreen() -> NSScreen {
     let mouseLocation = NSEvent.mouseLocation
     return NSScreen.screens.first(where: { $0.frame.contains(mouseLocation) })
@@ -195,7 +255,8 @@ final class NotchCoordinator {
   }
 }
 
-/// Tracks only the host-view boundary while the panel is resizing.
+/// Tracks only the host-view boundary. Child button hover regions cannot
+/// repeatedly toggle the window while it is resizing.
 @MainActor
 final class NotchTrackingHostingView<Content: View>: NSHostingView<Content> {
   var hoverHandler: ((Bool) -> Void)?
@@ -241,6 +302,9 @@ final class NotchPanel: NSPanel {
     isOpaque = false
     backgroundColor = .clear
     appearance = NSAppearance(named: .darkAqua)
+    // The panel itself is rectangular. A system window shadow reveals that
+    // rectangle around the rounded island, so the SwiftUI surface owns all
+    // visible chrome instead.
     hasShadow = false
     level = NSWindow.Level(rawValue: NSWindow.Level.statusBar.rawValue + 1)
     collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .stationary]

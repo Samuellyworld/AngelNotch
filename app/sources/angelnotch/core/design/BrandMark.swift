@@ -1,7 +1,7 @@
 import AppKit
 import SwiftUI
 
-/// the single continuous loop used by the app icon, island, and menu-bar item.
+/// The single continuous loop used by the app icon, island, and menu-bar item.
 struct AngelNotchMarkShape: Shape {
   func path(in rect: CGRect) -> Path {
     let x = rect.minX

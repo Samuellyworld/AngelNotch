@@ -28,7 +28,11 @@
   <true/>
   <key>NSHighResolutionCapable</key>
   <true/>
+  <key>NSAppleEventsUsageDescription</key>
+  <string>AngelNotch uses Apple events to show and control music playing in Spotify and Apple Music.</string>
   <key>NSCalendarsFullAccessUsageDescription</key>
   <string>AngelNotch shows your next event and provides a one-click meeting join button.</string>
+  <key>NSCameraUsageDescription</key>
+  <string>AngelNotch checks whether a camera is active to display a privacy indicator. It does not capture video.</string>
 </dict>
 </plist>
