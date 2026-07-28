@@ -1,0 +1,11 @@
+#!/bin/zsh
+set -euo pipefail
+
+PROJECT_DIR="$(git rev-parse --show-toplevel)"
+cd "$PROJECT_DIR"
+
+if git diff --cached --quiet -- app/Package.swift app/sources; then
+  exit 0
+fi
+
+./scripts/lint-app.sh
