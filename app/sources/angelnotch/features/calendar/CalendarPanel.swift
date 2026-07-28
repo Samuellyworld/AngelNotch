@@ -8,14 +8,31 @@ struct CalendarPanel: View {
       if !monitor.canReadEvents {
         VStack(spacing: 12) {
           EmptyPanel(
-            symbol: "calendar.badge.plus",
-            title: "Calendar access is off",
-            detail: "Allow access to show your next meeting."
+            symbol: accessSymbol,
+            title: accessTitle,
+            detail: accessDetail
           )
-          Button("Enable Calendar", action: monitor.requestAccess)
+          if let accessButtonTitle {
+            Button(action: monitor.requestAccess) {
+              if monitor.isRequestingAccess {
+                ProgressView()
+                  .controlSize(.small)
+              } else {
+                Text(accessButtonTitle)
+              }
+            }
             .buttonStyle(
               LoopCapsuleButtonStyle(color: LoopDesign.Palette.coral)
             )
+            .disabled(monitor.isRequestingAccess)
+          }
+          if let error = monitor.accessError {
+            Text(error)
+              .font(LoopDesign.TypeStyle.detail)
+              .foregroundStyle(LoopDesign.Palette.coral)
+              .multilineTextAlignment(.center)
+              .lineLimit(2)
+          }
         }
       } else if let event = monitor.nextEvent {
         VStack(spacing: 12) {
@@ -62,5 +79,66 @@ struct CalendarPanel: View {
       }
     }
     .frame(maxWidth: .infinity, maxHeight: .infinity)
+    .onAppear(perform: monitor.refresh)
+  }
+
+  private var accessSymbol: String {
+    switch monitor.authorizationStatus {
+    case .notDetermined:
+      "calendar.badge.plus"
+    case .denied, .restricted, .writeOnly:
+      "calendar.badge.exclamationmark"
+    case .fullAccess:
+      "calendar"
+    @unknown default:
+      "calendar.badge.exclamationmark"
+    }
+  }
+
+  private var accessTitle: String {
+    switch monitor.authorizationStatus {
+    case .notDetermined:
+      "Calendar access is off"
+    case .denied:
+      "Calendar access was denied"
+    case .restricted:
+      "Calendar access is restricted"
+    case .writeOnly:
+      "Full Calendar access is needed"
+    case .fullAccess:
+      "Calendar access is on"
+    @unknown default:
+      "Calendar access is unavailable"
+    }
+  }
+
+  private var accessDetail: String {
+    switch monitor.authorizationStatus {
+    case .notDetermined:
+      "Allow access to show your next meeting."
+    case .denied:
+      "Allow AngelNotch in System Settings to show your next meeting."
+    case .restricted:
+      "A system restriction prevents AngelNotch from reading events."
+    case .writeOnly:
+      "Change AngelNotch to Full Access in System Settings."
+    case .fullAccess:
+      "AngelNotch can show your next meeting."
+    @unknown default:
+      "Review AngelNotch's Calendar permission in System Settings."
+    }
+  }
+
+  private var accessButtonTitle: String? {
+    switch monitor.authorizationStatus {
+    case .notDetermined:
+      "Enable Calendar"
+    case .denied, .writeOnly:
+      "Open Calendar Settings"
+    case .restricted, .fullAccess:
+      nil
+    @unknown default:
+      "Open Calendar Settings"
+    }
   }
 }
