@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" role="img" aria-label="AngelNotch icon">
+  <defs>
+    <linearGradient id="loop" x1="210" y1="750" x2="814" y2="274" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#C68168"/>
+      <stop offset=".48" stop-color="#E98563"/>
+      <stop offset="1" stop-color="#E6B28E"/>
+    </linearGradient>
+  </defs>
+  <rect x="48" y="48" width="928" height="928" rx="210" fill="#11110F"/>
+  <rect x="49" y="49" width="926" height="926" rx="209" fill="none" stroke="#F3EFE7" stroke-opacity=".08" stroke-width="2"/>
+  <path
+    d="M512 512
+       C410 266 317 133 246 799
+       C72 799 102 256 512 512
+       C614 758 707 891 778 225
+       C952 225 922 768 512 512"
+    fill="none"
+    stroke="#080807"
+    stroke-width="124"
+    stroke-linecap="round"
+    stroke-linejoin="round"/>
+  <path
+    d="M512 512
+       C410 266 317 133 246 799
+       C72 799 102 256 512 512
+       C614 758 707 891 778 225
+       C952 225 922 768 512 512"
+    fill="none"
+    stroke="url(#loop)"
+    stroke-width="82"
+    stroke-linecap="round"
+    stroke-linejoin="round"/>
+</svg>
