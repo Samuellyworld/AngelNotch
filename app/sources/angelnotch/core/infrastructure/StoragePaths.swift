@@ -24,6 +24,15 @@ enum StoragePaths {
     return url
   }()
 
+  static let clipboardImages: URL = {
+    let url = root.appending(path: "Clipboard Images", directoryHint: .isDirectory)
+    try? FileManager.default.createDirectory(
+      at: url,
+      withIntermediateDirectories: true
+    )
+    return url
+  }()
+
   static func load<T: Decodable>(_ type: T.Type, from filename: String) -> T? {
     let url = root.appending(path: filename)
     guard let data = try? Data(contentsOf: url) else { return nil }

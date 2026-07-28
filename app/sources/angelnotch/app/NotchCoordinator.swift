@@ -30,12 +30,28 @@ final class NotchCoordinator {
     panel.contentView = hostingView
     panel.orderFrontRegardless()
     movePanel(expanded: false)
+    model.startServices()
     configureHotKeys()
 
     model.$isExpanded
       .removeDuplicates()
       .sink { [weak self] expanded in
         self?.movePanel(expanded: expanded, animated: true)
+      }
+      .store(in: &subscriptions)
+
+    model.settings.$enableClipboard
+      .dropFirst()
+      .sink { [weak self] enabled in
+        guard let self else { return }
+        if enabled {
+          model.clipboard.start()
+        } else {
+          model.clipboard.stop()
+          if model.selectedTab == .clipboard {
+            model.selectedTab = .home
+          }
+        }
       }
       .store(in: &subscriptions)
 
@@ -60,9 +76,9 @@ final class NotchCoordinator {
     }
   }
 
-  func showAndExpand() {
+  func showAndExpand(tab: IslandTab? = nil) {
     panel.orderFrontRegardless()
-    model.expand()
+    model.expand(tab: tab)
   }
 
   func openSettings() {
@@ -93,6 +109,8 @@ final class NotchCoordinator {
       case .toggleIsland:
         panel.orderFrontRegardless()
         model.toggleExpanded()
+      case .showClipboard:
+        showAndExpand(tab: .clipboard)
       }
     }
     hotKeys.registerDefaults()

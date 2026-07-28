@@ -1,17 +1,42 @@
 import Foundation
 
+enum IslandTab: String, CaseIterable, Identifiable {
+  case home
+  case clipboard
+
+  var id: String { rawValue }
+
+  var title: String {
+    switch self {
+    case .home: "Home"
+    case .clipboard: "Clipboard"
+    }
+  }
+}
+
 /// User-facing state shared by the compact and expanded island.
 @MainActor
 final class NotchModel: ObservableObject {
   @Published var isExpanded = false
   @Published var isPinned = false
+  @Published var selectedTab: IslandTab = .home
 
   let settings = AppSettings()
+  let clipboard = ClipboardHistoryStore()
 
   private var collapseTask: Task<Void, Never>?
 
-  func expand() {
+  func startServices() {
+    if settings.enableClipboard {
+      clipboard.start()
+    }
+  }
+
+  func expand(tab: IslandTab? = nil) {
     collapseTask?.cancel()
+    if let tab, selectedTab != tab {
+      selectedTab = tab
+    }
     guard !isExpanded else { return }
     isExpanded = true
   }

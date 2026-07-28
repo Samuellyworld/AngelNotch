@@ -15,7 +15,7 @@ struct NotchRootView: View {
       islandShape
 
       if model.isExpanded {
-        ExpandedFoundationView(model: model)
+        ExpandedClipboardView(model: model)
           .transition(
             .asymmetric(
               insertion: .opacity.combined(
@@ -92,33 +92,87 @@ private struct CompactFoundationView: View {
   }
 }
 
-private struct ExpandedFoundationView: View {
+private struct ExpandedClipboardView: View {
   @ObservedObject var model: NotchModel
+  @ObservedObject var settings: AppSettings
+
+  init(model: NotchModel) {
+    self.model = model
+    settings = model.settings
+  }
 
   var body: some View {
-    VStack(spacing: 14) {
+    VStack(spacing: 10) {
       Color.clear.frame(height: 25)
+      header
+      tabs
+      content
+        .padding(.horizontal, 8)
+        .padding(.top, 3)
+    }
+    .padding(.horizontal, 14)
+    .padding(.bottom, 14)
+  }
 
-      HStack(spacing: 10) {
-        LoopMiniMark()
-          .frame(width: 28, height: 20)
+  private var header: some View {
+    HStack(spacing: 10) {
+      LoopMiniMark()
+        .frame(width: 28, height: 20)
 
-        Text("AngelNotch")
-          .font(LoopDesign.TypeStyle.title)
-          .foregroundStyle(LoopDesign.Palette.textPrimary)
-
-        Spacer()
-
-        LoopIconButton(
-          symbol: model.isPinned ? "pin.fill" : "pin",
-          active: model.isPinned,
-          help: model.isPinned ? "Unpin island" : "Keep island open",
-          action: model.togglePinned
-        )
-      }
+      Text("AngelNotch")
+        .font(LoopDesign.TypeStyle.title)
+        .foregroundStyle(LoopDesign.Palette.textPrimary)
 
       Spacer()
 
+      LoopIconButton(
+        symbol: model.isPinned ? "pin.fill" : "pin",
+        active: model.isPinned,
+        help: model.isPinned ? "Unpin island" : "Keep island open",
+        action: model.togglePinned
+      )
+    }
+  }
+
+  private var tabs: some View {
+    HStack(spacing: 7) {
+      ForEach(visibleTabs) { tab in
+        NavigationTabButton(
+          tab: tab,
+          isSelected: model.selectedTab == tab,
+          accent: settings.accent.color
+        ) {
+          model.selectedTab = tab
+        }
+      }
+    }
+    .frame(maxWidth: .infinity)
+    .overlay(alignment: .bottom) {
+      Rectangle()
+        .fill(LoopDesign.Palette.cream.opacity(0.07))
+        .frame(height: 0.5)
+    }
+  }
+
+  @ViewBuilder
+  private var content: some View {
+    switch model.selectedTab {
+    case .home:
+      FoundationHomePanel()
+    case .clipboard:
+      ClipboardPanel(store: model.clipboard)
+    }
+  }
+
+  private var visibleTabs: [IslandTab] {
+    settings.enableClipboard ? IslandTab.allCases : [.home]
+  }
+}
+
+private struct FoundationHomePanel: View {
+  var body: some View {
+    VStack(spacing: 14) {
+      Spacer(minLength: 0)
       AngelNotchMarkShape()
         .stroke(
           LoopDesign.Palette.accent,
@@ -130,18 +184,13 @@ private struct ExpandedFoundationView: View {
         .font(LoopDesign.TypeStyle.display)
         .foregroundStyle(LoopDesign.Palette.textPrimary)
 
-      Text("AngelNotch is ready for its first feature.")
+      Text("Clipboard history is ready.")
         .font(LoopDesign.TypeStyle.label)
         .foregroundStyle(LoopDesign.Palette.textSecondary)
 
-      Spacer()
-
-      Text("⌥ Space")
-        .font(LoopDesign.TypeStyle.detail)
-        .foregroundStyle(LoopDesign.Palette.textTertiary)
+      Spacer(minLength: 0)
     }
-    .padding(.horizontal, 22)
-    .padding(.bottom, 18)
+    .frame(maxWidth: .infinity, maxHeight: .infinity)
   }
 }
 
@@ -174,7 +223,7 @@ private struct LoopMiniMark: View {
   }
 }
 
-private struct LoopIconButton: View {
+struct LoopIconButton: View {
   let symbol: String
   var active = false
   let help: String
@@ -208,5 +257,131 @@ private struct LoopIconButton: View {
     .animation(LoopDesign.Motion.hover, value: isHovering)
     .help(help)
     .interactiveCursor()
+  }
+}
+
+struct LoopHoverSurface: ViewModifier {
+  let cornerRadius: CGFloat
+  let isSelected: Bool
+  @State private var isHovering = false
+
+  func body(content: Content) -> some View {
+    content
+      .background(
+        isSelected
+          ? LoopDesign.Palette.surfaceRaised
+          : isHovering
+            ? LoopDesign.Palette.surface
+            : LoopDesign.Palette.surfaceQuiet,
+        in: RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+      )
+      .overlay {
+        RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+          .stroke(
+            isSelected
+              ? LoopDesign.Palette.accent.opacity(0.35)
+              : isHovering
+                ? LoopDesign.Palette.outline
+                : .clear,
+            lineWidth: 0.7
+          )
+      }
+      .scaleEffect(isHovering ? 1.008 : 1)
+      .offset(y: isHovering ? -0.5 : 0)
+      .onHover { isHovering = $0 }
+      .animation(LoopDesign.Motion.hover, value: isHovering)
+      .animation(LoopDesign.Motion.hover, value: isSelected)
+  }
+}
+
+private struct NavigationTabButton: View {
+  let tab: IslandTab
+  let isSelected: Bool
+  let accent: Color
+  let action: () -> Void
+  @State private var isHovering = false
+
+  var body: some View {
+    Button(action: action) {
+      Text(tab.title)
+        .font(LoopDesign.TypeStyle.detail)
+        .lineLimit(1)
+        .foregroundStyle(
+          isSelected
+            ? LoopDesign.Palette.textPrimary
+            : isHovering
+              ? LoopDesign.Palette.textSecondary
+              : LoopDesign.Palette.textTertiary
+        )
+        .padding(.horizontal, 7)
+        .frame(height: 34)
+        .overlay(alignment: .bottom) {
+          Capsule()
+            .fill(isSelected ? accent : .clear)
+            .frame(width: 14, height: 2)
+        }
+        .contentShape(Rectangle())
+    }
+    .buttonStyle(.plain)
+    .onHover { isHovering = $0 }
+    .animation(LoopDesign.Motion.hover, value: isHovering)
+    .animation(LoopDesign.Motion.hover, value: isSelected)
+    .help(tab.title)
+    .interactiveCursor()
+  }
+}
+
+struct LoopPrimaryButtonStyle: ButtonStyle {
+  func makeBody(configuration: Configuration) -> some View {
+    configuration.label
+      .font(LoopDesign.TypeStyle.label)
+      .padding(.horizontal, 12)
+      .frame(height: 29)
+      .background(
+        configuration.isPressed
+          ? LoopDesign.Palette.cream.opacity(0.78)
+          : LoopDesign.Palette.cream,
+        in: RoundedRectangle(cornerRadius: 9)
+      )
+      .foregroundStyle(LoopDesign.Palette.canvas)
+      .scaleEffect(configuration.isPressed ? 0.97 : 1)
+      .animation(LoopDesign.Motion.hover, value: configuration.isPressed)
+      .interactiveCursor()
+  }
+}
+
+struct LoopTextButtonStyle: ButtonStyle {
+  func makeBody(configuration: Configuration) -> some View {
+    configuration.label
+      .font(LoopDesign.TypeStyle.label)
+      .padding(.horizontal, 10)
+      .frame(height: 32)
+      .background(
+        LoopDesign.Palette.accent.opacity(configuration.isPressed ? 0.22 : 0.12),
+        in: RoundedRectangle(cornerRadius: 9)
+      )
+      .foregroundStyle(LoopDesign.Palette.accent)
+      .scaleEffect(configuration.isPressed ? 0.98 : 1)
+      .interactiveCursor()
+  }
+}
+
+struct EmptyPanel: View {
+  let symbol: String
+  let title: String
+  let detail: String
+
+  var body: some View {
+    VStack(spacing: 7) {
+      Image(systemName: symbol)
+        .font(.system(size: 28, weight: .medium))
+        .foregroundStyle(LoopDesign.Palette.textTertiary)
+      Text(title)
+        .font(LoopDesign.TypeStyle.title)
+      Text(detail)
+        .font(LoopDesign.TypeStyle.detail)
+        .foregroundStyle(LoopDesign.Palette.textSecondary)
+    }
+    .frame(maxWidth: .infinity, maxHeight: .infinity)
   }
 }

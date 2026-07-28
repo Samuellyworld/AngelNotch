@@ -43,6 +43,9 @@ final class AppSettings: ObservableObject {
   @Published var accent: AccentChoice {
     didSet { defaults.set(accent.rawValue, forKey: "appearance.accent") }
   }
+  @Published var enableClipboard: Bool {
+    didSet { defaults.set(enableClipboard, forKey: "features.clipboard") }
+  }
   @Published var enableReducedMotion: Bool {
     didSet { defaults.set(enableReducedMotion, forKey: "appearance.reducedMotion") }
   }
@@ -62,6 +65,10 @@ final class AppSettings: ObservableObject {
       AccentChoice(
         rawValue: defaults.string(forKey: "appearance.accent") ?? ""
       ) ?? .spectrum
+
+    enableClipboard =
+      defaults.object(forKey: "features.clipboard") as? Bool
+      ?? true
 
     enableReducedMotion =
       defaults.object(
@@ -156,8 +163,13 @@ struct AngelNotchSettingsView: View {
         Toggle("Reduce motion", isOn: $settings.enableReducedMotion)
       }
 
-      Section("Global shortcut") {
+      Section("Widgets") {
+        Toggle("Clipboard history", isOn: $settings.enableClipboard)
+      }
+
+      Section("Global shortcuts") {
         LabeledContent("Open AngelNotch", value: "⌥ Space")
+        LabeledContent("Clipboard history", value: "⌃⌥ V")
       }
     }
     .formStyle(.grouped)
