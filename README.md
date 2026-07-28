@@ -1,4 +1,4 @@
-# AngelNotch
+<h1 align="center">AngelNotch</h1>
 
 <p align="center">
   <img src="resources/app-icon.png" width="144" alt="AngelNotch app icon">
