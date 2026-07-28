@@ -4,6 +4,7 @@ import Foundation
 enum GlobalHotKeyAction: UInt32 {
   case toggleIsland = 1
   case showClipboard = 2
+  case screenshot = 3
 }
 
 @MainActor
@@ -19,6 +20,11 @@ final class GlobalHotKeyManager {
     register(
       .showClipboard,
       keyCode: UInt32(kVK_ANSI_V),
+      modifiers: UInt32(controlKey | optionKey)
+    )
+    register(
+      .screenshot,
+      keyCode: UInt32(kVK_ANSI_S),
       modifiers: UInt32(controlKey | optionKey)
     )
   }
