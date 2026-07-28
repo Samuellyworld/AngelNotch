@@ -9,9 +9,8 @@
     <title>AngelNotch — Your Mac, at a glance.</title>
     <meta
       name="description"
-      content="AngelNotch turns the MacBook notch into a compact workspace for media, clipboard history, files, focus, calendar events, system controls, and live activities."
+      content="AngelNotch turns the MacBook notch into a compact workspace for media, clipboard history, files, focus, calendar events, system controls, and live activities. Local-first, free of tracking, built for macOS 14 and later."
     />
-    <meta name="author" content="Samuel Tosin" />
     <link rel="canonical" href="https://angelnotch.ng/" />
 
     <meta property="og:type" content="website" />
@@ -20,23 +19,25 @@
     <meta property="og:title" content="AngelNotch — Your Mac, at a glance." />
     <meta
       property="og:description"
-      content="Turn the MacBook notch into a compact workspace for media, clipboard, files, focus, calendar, and system controls."
+      content="Turn the MacBook notch into a compact workspace for media, clipboard, files, focus, calendar, and system controls. Local-first and private."
     />
     <meta property="og:image" content="https://angelnotch.ng/og-image.png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
-    <meta
-      property="og:image:alt"
-      content="AngelNotch open in the notch of a MacBook, showing media controls."
-    />
+    <meta property="og:image:alt" content="AngelNotch open in the notch of a MacBook, showing media controls." />
+    <meta property="og:locale" content="en_US" />
 
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="AngelNotch — Your Mac, at a glance." />
     <meta
       name="twitter:description"
-      content="Turn the MacBook notch into a compact workspace for media, clipboard, files, focus, calendar, and system controls."
+      content="Turn the MacBook notch into a compact workspace for media, clipboard, files, focus, calendar, and system controls. Local-first and private."
     />
     <meta name="twitter:image" content="https://angelnotch.ng/og-image.png" />
+
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <meta name="author" content="Samuel Tosin" />
+    <meta name="apple-mobile-web-app-title" content="AngelNotch" />
 
     <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
     <link rel="icon" href="./favicon-32.png" sizes="32x32" type="image/png" />
@@ -50,7 +51,8 @@
       href="https://fonts.googleapis.com/css2?family=Geist:wght@300..700&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap"
     />
 
-    <!-- Preload the first hero frame so the scroll sequence is ready quickly. -->
+    <!-- first frame of the hero sequence, so the canvas has something to draw
+         on the very first paint rather than waiting on the loader. -->
     <link rel="preload" as="image" href="./frames/lg/001.webp" fetchpriority="high" />
 
     <script type="application/ld+json">
@@ -61,13 +63,76 @@
         "applicationCategory": "UtilitiesApplication",
         "operatingSystem": "macOS 14.0 or later",
         "url": "https://angelnotch.ng/",
-        "description": "AngelNotch is a local-first macOS utility that turns the MacBook notch into a compact, expandable workspace.",
+        "downloadUrl": "https://angelnotch.ng/AngelNotch-macos.dmg",
+        "description": "AngelNotch is a local-first macOS utility that turns the MacBook notch into a compact, expandable workspace for media, clipboard history, files, focus, calendar events, system controls, and live activities.",
         "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
         "author": {
           "@type": "Person",
           "name": "Samuel Tosin",
           "url": "https://github.com/Samuellyworld"
         }
+      }
+    </script>
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "Does AngelNotch upload my clipboard history?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "No. Clipboard history stays on your Mac. There is no cloud clipboard and nothing is synced anywhere."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Does it record my camera or microphone?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "No. AngelNotch does not record, store, transcribe, or transmit camera or microphone content. During an active call it may sample local microphone amplitude only to draw the compact waveform."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Do I need the Chrome extension?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "No. The extension is optional. It adds YouTube playback information and Chrome download progress, and every other feature works without it."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Which music services are supported?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Spotify, Apple Music, YouTube and YouTube Music."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Which version of macOS is required?",
+            "acceptedAnswer": { "@type": "Answer", "text": "macOS 14 or newer." }
+          },
+          {
+            "@type": "Question",
+            "name": "Does AngelNotch require an account?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "No. There is no sign-up, no login and no account of any kind."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Can I run it from source?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes. The repository has build and development instructions, and the whole project is open on GitHub."
+            }
+          }
+        ]
       }
     </script>
   </head>

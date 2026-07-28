@@ -58,7 +58,7 @@ export function Hero() {
 
   const { ref: sectionRef } = useScrollScrub<HTMLElement>({
     damping: compact ? 0.18 : 0.09,
-    onFrame: (eased) => {
+    onFrame: (eased, raw) => {
       const section = sectionRef.current;
       const clamp01 = (value: number) => Math.min(1, Math.max(0, value));
       const smoothstep = (value: number) => {
@@ -66,7 +66,8 @@ export function Hero() {
         return clamped * clamped * (3 - 2 * clamped);
       };
 
-      // Mobile uses distinct beats: zoom first, then play the demo.
+      // Mobile uses distinct beats: zoom first, demo second, then lets the light
+      // intro overlap the hero at roughly 68% scroll.
       const focus = compact
         ? smoothstep((eased - 0.08) / 0.26)
         : smoothstep((eased - 0.16) / 0.34);
@@ -85,8 +86,9 @@ export function Hero() {
         const copyOpacity = 1 - smoothstep(eased / (compact ? 0.3 : 0.17));
         const chromeOpacity =
           1 - smoothstep((eased - 0.01) / (compact ? 0.28 : 0.16));
-        // Mobile begins with the complete laptop in view, then moves in far
-        // enough for the interface on its display to remain readable.
+        // Mobile still begins with the complete laptop in view, then moves in
+        // far enough for the interface on its display to remain readable. It
+        // stays low enough for the light intro panel to cover it during handoff.
         const scale = 1 + focus * (compact ? 0.85 : 1.35);
         const lift = focus * (compact ? -6 : -26);
 
@@ -96,7 +98,12 @@ export function Hero() {
         section.style.setProperty("--hero-actions-y", `${(eased * 40).toFixed(2)}px`);
         section.style.setProperty("--hero-brightness", (1 + approach * 0.12).toFixed(3));
         section.style.setProperty("--hero-contrast", (1 + approach * 0.06).toFixed(3));
-        section.style.setProperty("--hero-exit-opacity", "1");
+        section.style.setProperty(
+          "--hero-exit-opacity",
+          compact
+            ? "1"
+            : (1 - smoothstep((Math.max(eased, raw) - 0.72) / 0.18)).toFixed(4),
+        );
         section.style.setProperty("--hero-copy-opacity", copyOpacity.toFixed(4));
         section.style.setProperty("--hero-chrome-opacity", chromeOpacity.toFixed(4));
         section.style.setProperty("--hero-progress", eased.toFixed(4));
