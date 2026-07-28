@@ -42,6 +42,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     showItem.target = self
     menu.addItem(showItem)
 
+    let clipboardItem = NSMenuItem(
+      title: "Clipboard History",
+      action: #selector(showClipboard),
+      keyEquivalent: ""
+    )
+    clipboardItem.target = self
+    menu.addItem(clipboardItem)
+
     let settingsItem = NSMenuItem(
       title: "Settings…",
       action: #selector(showSettings),
@@ -65,6 +73,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
   @objc private func showAngelNotch() {
     coordinator?.showAndExpand()
+  }
+
+  @objc private func showClipboard() {
+    coordinator?.showAndExpand(tab: .clipboard)
   }
 
   @objc private func showSettings() {

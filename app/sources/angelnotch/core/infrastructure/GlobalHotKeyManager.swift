@@ -3,6 +3,7 @@ import Foundation
 
 enum GlobalHotKeyAction: UInt32 {
   case toggleIsland = 1
+  case showClipboard = 2
 }
 
 @MainActor
@@ -15,6 +16,11 @@ final class GlobalHotKeyManager {
   func registerDefaults() {
     installHandlerIfNeeded()
     register(.toggleIsland, keyCode: UInt32(kVK_Space), modifiers: UInt32(optionKey))
+    register(
+      .showClipboard,
+      keyCode: UInt32(kVK_ANSI_V),
+      modifiers: UInt32(controlKey | optionKey)
+    )
   }
 
   private func installHandlerIfNeeded() {
