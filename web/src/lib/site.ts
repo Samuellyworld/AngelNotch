@@ -1,4 +1,25 @@
-/** Hero frame sequence, written by scripts/prepare-media.py. */
+/** Single source of truth for every outbound link and version string. */
+
+export const SITE_URL = "https://angelnotch.ng";
+
+export const REPO_URL = "https://github.com/Samuellyworld/AngelNotch";
+export const RELEASES_URL = `${REPO_URL}/releases`;
+export const README_URL = `${REPO_URL}#readme`;
+export const EXTENSION_SETUP_URL = `${REPO_URL}#optional-chrome-extension`;
+export const RUN_FROM_SOURCE_URL = `${REPO_URL}#run-from-source`;
+export const ISSUES_URL = `${REPO_URL}/issues`;
+export const AUTHOR_NAME = "Samuel Tosin";
+export const AUTHOR_URL = "https://github.com/Samuellyworld";
+
+export const MIN_MACOS = "macOS 14";
+
+/** The signed build served straight from the site, with the releases page kept
+ *  alongside it for older versions and checksums. */
+export const DOWNLOAD_URL = "AngelNotch-macos.dmg";
+export const DOWNLOAD_NAME = "AngelNotch-macos.dmg";
+export const DOWNLOAD_SIZE = "1.4 MB";
+
+/** Hero frame sequence dimensions and frame counts. */
 export const FRAME_COUNT = 65;
 export const FRAME_COUNT_SM = 33;
 export const FRAME_DIR_LG = "frames/lg";
