@@ -3,6 +3,7 @@ import Foundation
 enum IslandTab: String, CaseIterable, Identifiable {
   case home
   case clipboard
+  case files
 
   var id: String { rawValue }
 
@@ -10,6 +11,7 @@ enum IslandTab: String, CaseIterable, Identifiable {
     switch self {
     case .home: "Home"
     case .clipboard: "Clipboard"
+    case .files: "Files"
     }
   }
 }
@@ -23,6 +25,7 @@ final class NotchModel: ObservableObject {
 
   let settings = AppSettings()
   let clipboard = ClipboardHistoryStore()
+  let files = FileShelfStore()
 
   private var collapseTask: Task<Void, Never>?
 

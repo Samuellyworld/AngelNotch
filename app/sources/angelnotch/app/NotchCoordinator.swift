@@ -88,7 +88,10 @@ final class NotchCoordinator {
       return
     }
 
-    let view = AngelNotchSettingsView(settings: model.settings)
+    let view = AngelNotchSettingsView(
+      settings: model.settings,
+      files: model.files
+    )
     let controller = NSHostingController(rootView: view)
     let window = NSWindow(contentViewController: controller)
     window.title = "AngelNotch Settings"
