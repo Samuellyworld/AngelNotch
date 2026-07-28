@@ -1,0 +1,36 @@
+{
+  "manifest_version": 3,
+  "name": "AngelNotch Browser Bridge",
+  "version": "1.0.0",
+  "description": "Shows YouTube playback and Chrome downloads in AngelNotch.",
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA56m559I3tYg0eN0Xi1V4aowiX65wA4AIH8qNQn2a1VYg3bHYpwdGkxRyDN/O82YkBpNaNW3K026qlpDjplffzi29ikpXDz/SvmR4VeV1S99wBxaNTO2Kj7UquqH8kblCmOAP7IImvb1LXSKvzooiQcDqs+Uzfzwq4mY84uc+DdrKt0D0RNr6jmuM/PcifiNA5Tjgfi07PUl++DorVOXmtw8BYV1npgwIbdXwKDQ4lzH9XSoGiKrJQfvhlBHaFlfrU0nE8PdyBCUHy7IHP/x7vShh/GSKr9sttMyrS4IwuTpfiSwIoRqmzTaPUnYC5l/oapI40DJBIuUM4ALGDufEswIDAQAB",
+  "permissions": [
+    "nativeMessaging",
+    "downloads"
+  ],
+  "host_permissions": [
+    "https://www.youtube.com/*",
+    "https://music.youtube.com/*"
+  ],
+  "background": {
+    "service_worker": "dist/background.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://www.youtube.com/*",
+        "https://music.youtube.com/*"
+      ],
+      "js": [
+        "dist/content.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
+}
