@@ -46,6 +46,9 @@ final class AppSettings: ObservableObject {
   @Published var enableClipboard: Bool {
     didSet { defaults.set(enableClipboard, forKey: "features.clipboard") }
   }
+  @Published var enableCalendar: Bool {
+    didSet { defaults.set(enableCalendar, forKey: "features.calendar") }
+  }
   @Published var enableReducedMotion: Bool {
     didSet { defaults.set(enableReducedMotion, forKey: "appearance.reducedMotion") }
   }
@@ -68,6 +71,9 @@ final class AppSettings: ObservableObject {
 
     enableClipboard =
       defaults.object(forKey: "features.clipboard") as? Bool
+      ?? true
+    enableCalendar =
+      defaults.object(forKey: "features.calendar") as? Bool
       ?? true
 
     enableReducedMotion =
@@ -167,6 +173,7 @@ struct AngelNotchSettingsView: View {
 
       Section("Widgets") {
         Toggle("Clipboard history", isOn: $settings.enableClipboard)
+        Toggle("Calendar", isOn: $settings.enableCalendar)
       }
 
       Section("File shelf") {

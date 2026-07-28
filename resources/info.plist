@@ -28,5 +28,7 @@
   <true/>
   <key>NSHighResolutionCapable</key>
   <true/>
+  <key>NSCalendarsFullAccessUsageDescription</key>
+  <string>AngelNotch shows your next event and provides a one-click meeting join button.</string>
 </dict>
 </plist>

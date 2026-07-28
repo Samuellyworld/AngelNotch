@@ -71,10 +71,12 @@ struct NotchRootView: View {
 private struct CompactFoundationView: View {
   @ObservedObject var model: NotchModel
   @ObservedObject var focus: FocusTimer
+  @ObservedObject var calendar: CalendarMonitor
 
   init(model: NotchModel) {
     self.model = model
     focus = model.focus
+    calendar = model.calendar
   }
 
   var body: some View {
@@ -87,6 +89,16 @@ private struct CompactFoundationView: View {
           color: LoopDesign.Palette.accent,
           help: focus.phase == .focus ? "Focus session" : "Break"
         )
+      } else if let event = calendar.nextEvent {
+        HStack(spacing: 6) {
+          CompactStateLabel(
+            text: event.isInProgress ? "NOW" : "NEXT",
+            color: LoopDesign.Palette.coral
+          )
+          Text(event.countdownLabel)
+            .font(LoopDesign.TypeStyle.label)
+            .foregroundStyle(LoopDesign.Palette.textSecondary)
+        }
       } else {
         LoopMiniMark()
       }
@@ -101,18 +113,26 @@ private struct CompactFoundationView: View {
           help: "Pause focus timer",
           action: focus.toggleRunning
         )
+      } else if let event = calendar.nextEvent {
+        CompactIconButton(
+          symbol: event.joinURL == nil ? "calendar" : "video.fill",
+          color: LoopDesign.Palette.coral,
+          help: event.joinURL == nil ? "Open calendar" : "Join meeting",
+          action: {
+            if event.joinURL == nil {
+              model.expand(tab: .calendar)
+            } else {
+              calendar.joinNextEvent()
+            }
+          }
+        )
       } else {
-        Button {
-          model.expand()
-        } label: {
-          Image(systemName: "chevron.down")
-            .font(.system(size: 9, weight: .semibold))
-            .foregroundStyle(LoopDesign.Palette.textSecondary)
-            .frame(width: 24, height: 24)
-        }
-        .buttonStyle(.plain)
-        .interactiveCursor()
-        .help("Open AngelNotch")
+        CompactIconButton(
+          symbol: "chevron.down",
+          color: LoopDesign.Palette.textSecondary,
+          help: "Open AngelNotch",
+          action: { model.expand() }
+        )
       }
     }
     .padding(.horizontal, 12)
@@ -193,12 +213,16 @@ private struct ExpandedFeaturesView: View {
       FileShelfPanel(store: model.files)
     case .focus:
       FocusPanel(timer: model.focus)
+    case .calendar:
+      CalendarPanel(monitor: model.calendar)
     }
   }
 
   private var visibleTabs: [IslandTab] {
     IslandTab.allCases.filter {
-      $0 != .clipboard || settings.enableClipboard
+      if $0 == .clipboard { return settings.enableClipboard }
+      if $0 == .calendar { return settings.enableCalendar }
+      return true
     }
   }
 }
@@ -241,6 +265,49 @@ private struct CompactStateIcon: View {
       .frame(width: 18, height: 24, alignment: .leading)
       .accessibilityLabel(help)
       .help(help)
+  }
+}
+
+private struct CompactStateLabel: View {
+  let text: String
+  let color: Color
+
+  var body: some View {
+    Text(text)
+      .font(.system(size: 8, weight: .semibold))
+      .tracking(0.75)
+      .foregroundStyle(color)
+      .lineLimit(1)
+      .fixedSize(horizontal: true, vertical: false)
+  }
+}
+
+private struct CompactIconButton: View {
+  let symbol: String
+  let color: Color
+  let help: String
+  let action: () -> Void
+
+  @State private var isHovering = false
+
+  var body: some View {
+    Button(action: action) {
+      Image(systemName: symbol)
+        .font(.system(size: 9, weight: .semibold))
+        .symbolRenderingMode(.monochrome)
+        .foregroundStyle(color)
+        .frame(width: 24, height: 24)
+        .background(
+          LoopDesign.Palette.surface.opacity(isHovering ? 1 : 0),
+          in: Circle()
+        )
+        .scaleEffect(isHovering ? 1.04 : 1)
+    }
+    .buttonStyle(.plain)
+    .interactiveCursor()
+    .onHover { isHovering = $0 }
+    .animation(LoopDesign.Motion.hover, value: isHovering)
+    .help(help)
   }
 }
 
@@ -454,6 +521,23 @@ struct LoopTextButtonStyle: ButtonStyle {
       )
       .foregroundStyle(LoopDesign.Palette.accent)
       .scaleEffect(configuration.isPressed ? 0.98 : 1)
+      .interactiveCursor()
+  }
+}
+
+struct LoopCapsuleButtonStyle: ButtonStyle {
+  var color: Color = LoopDesign.Palette.textSecondary
+
+  func makeBody(configuration: Configuration) -> some View {
+    configuration.label
+      .font(LoopDesign.TypeStyle.label)
+      .padding(.horizontal, 13)
+      .frame(height: 32)
+      .background(
+        color.opacity(configuration.isPressed ? 0.34 : 0.18),
+        in: Capsule()
+      )
+      .foregroundStyle(color)
       .interactiveCursor()
   }
 }
