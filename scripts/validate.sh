@@ -14,6 +14,14 @@ python3 -m json.tool chrome-extension/manifest.json >/dev/null
 xmllint --noout resources/app-icon.svg
 plutil -lint resources/info.plist
 plutil -lint resources/AngelNotch.entitlements
+if [[ "$(
+  /usr/libexec/PlistBuddy \
+    -c "Print :com.apple.security.personal-information.calendars" \
+    resources/AngelNotch.entitlements
+)" != "true" ]]; then
+  echo "Calendar access requires the calendars code-signing entitlement." >&2
+  exit 1
+fi
 for voice_asset in \
   app/resources/media/focus-complete-idera.mp3 \
   app/resources/media/break-complete-idera.mp3
