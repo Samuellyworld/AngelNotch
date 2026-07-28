@@ -12,6 +12,7 @@ enum LoopDesign {
 
     static let accent = Color(red: 0.91, green: 0.52, blue: 0.38)
     static let cream = Color(red: 0.95, green: 0.93, blue: 0.89)
+    static let sun = Color(red: 0.82, green: 0.67, blue: 0.42)
 
     static let textPrimary = cream
     static let textSecondary = cream.opacity(0.58)

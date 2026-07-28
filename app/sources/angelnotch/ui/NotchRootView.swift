@@ -70,22 +70,50 @@ struct NotchRootView: View {
 
 private struct CompactFoundationView: View {
   @ObservedObject var model: NotchModel
+  @ObservedObject var focus: FocusTimer
+
+  init(model: NotchModel) {
+    self.model = model
+    focus = model.focus
+  }
 
   var body: some View {
     HStack {
-      LoopMiniMark()
-      Spacer()
-      Button {
-        model.expand()
-      } label: {
-        Image(systemName: "chevron.down")
-          .font(.system(size: 9, weight: .semibold))
-          .foregroundStyle(LoopDesign.Palette.textSecondary)
-          .frame(width: 24, height: 24)
+      if focus.isRunning {
+        CompactStateIcon(
+          symbol: focus.phase == .focus
+            ? "timer"
+            : "cup.and.saucer.fill",
+          color: LoopDesign.Palette.accent,
+          help: focus.phase == .focus ? "Focus session" : "Break"
+        )
+      } else {
+        LoopMiniMark()
       }
-      .buttonStyle(.plain)
-      .interactiveCursor()
-      .help("Open AngelNotch")
+
+      Spacer()
+
+      if focus.isRunning {
+        CompactProgressButton(
+          progress: focus.progress,
+          isRunning: focus.isRunning,
+          color: LoopDesign.Palette.accent,
+          help: "Pause focus timer",
+          action: focus.toggleRunning
+        )
+      } else {
+        Button {
+          model.expand()
+        } label: {
+          Image(systemName: "chevron.down")
+            .font(.system(size: 9, weight: .semibold))
+            .foregroundStyle(LoopDesign.Palette.textSecondary)
+            .frame(width: 24, height: 24)
+        }
+        .buttonStyle(.plain)
+        .interactiveCursor()
+        .help("Open AngelNotch")
+      }
     }
     .padding(.horizontal, 12)
     .frame(maxHeight: .infinity)
@@ -163,11 +191,15 @@ private struct ExpandedFeaturesView: View {
       ClipboardPanel(store: model.clipboard)
     case .files:
       FileShelfPanel(store: model.files)
+    case .focus:
+      FocusPanel(timer: model.focus)
     }
   }
 
   private var visibleTabs: [IslandTab] {
-    settings.enableClipboard ? IslandTab.allCases : [.home]
+    IslandTab.allCases.filter {
+      $0 != .clipboard || settings.enableClipboard
+    }
   }
 }
 
@@ -186,13 +218,71 @@ private struct FoundationHomePanel: View {
         .font(LoopDesign.TypeStyle.display)
         .foregroundStyle(LoopDesign.Palette.textPrimary)
 
-      Text("Clipboard history and the file shelf are ready.")
+      Text("Clipboard, file shelf, and focus timer are ready.")
         .font(LoopDesign.TypeStyle.label)
         .foregroundStyle(LoopDesign.Palette.textSecondary)
 
       Spacer(minLength: 0)
     }
     .frame(maxWidth: .infinity, maxHeight: .infinity)
+  }
+}
+
+private struct CompactStateIcon: View {
+  let symbol: String
+  let color: Color
+  let help: String
+
+  var body: some View {
+    Image(systemName: symbol)
+      .font(.system(size: 11, weight: .semibold))
+      .symbolRenderingMode(.monochrome)
+      .foregroundStyle(color)
+      .frame(width: 18, height: 24, alignment: .leading)
+      .accessibilityLabel(help)
+      .help(help)
+  }
+}
+
+private struct CompactProgressButton: View {
+  let progress: Double
+  let isRunning: Bool
+  let color: Color
+  let help: String
+  let action: () -> Void
+
+  var body: some View {
+    Button(action: action) {
+      ZStack {
+        CircularProgress(value: progress, color: color)
+          .frame(width: 21, height: 21)
+        Image(systemName: isRunning ? "pause.fill" : "play.fill")
+          .font(.system(size: 6, weight: .bold))
+          .foregroundStyle(color)
+          .offset(x: isRunning ? 0 : 0.4)
+      }
+      .frame(width: 24, height: 24)
+    }
+    .buttonStyle(.plain)
+    .interactiveCursor()
+    .help(help)
+  }
+}
+
+struct CircularProgress: View {
+  let value: Double
+  let color: Color
+
+  var body: some View {
+    ZStack {
+      Circle()
+        .stroke(LoopDesign.Palette.surface, lineWidth: 3)
+      Circle()
+        .trim(from: 0, to: max(0.002, min(1, value)))
+        .stroke(color, style: StrokeStyle(lineWidth: 3, lineCap: .round))
+        .rotationEffect(.degrees(-90))
+    }
+    .animation(.easeOut(duration: 0.2), value: value)
   }
 }
 
