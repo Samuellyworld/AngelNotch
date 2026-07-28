@@ -5,6 +5,7 @@ enum IslandTab: String, CaseIterable, Identifiable {
   case clipboard
   case files
   case focus
+  case calendar
 
   var id: String { rawValue }
 
@@ -14,6 +15,7 @@ enum IslandTab: String, CaseIterable, Identifiable {
     case .clipboard: "Clipboard"
     case .files: "Files"
     case .focus: "Focus"
+    case .calendar: "Calendar"
     }
   }
 }
@@ -29,12 +31,16 @@ final class NotchModel: ObservableObject {
   let clipboard = ClipboardHistoryStore()
   let files = FileShelfStore()
   let focus = FocusTimer()
+  let calendar = CalendarMonitor()
 
   private var collapseTask: Task<Void, Never>?
 
   func startServices() {
     if settings.enableClipboard {
       clipboard.start()
+    }
+    if settings.enableCalendar {
+      calendar.start()
     }
   }
 

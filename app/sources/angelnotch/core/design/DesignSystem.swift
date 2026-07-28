@@ -12,6 +12,7 @@ enum LoopDesign {
 
     static let accent = Color(red: 0.91, green: 0.52, blue: 0.38)
     static let cream = Color(red: 0.95, green: 0.93, blue: 0.89)
+    static let coral = accent
     static let sun = Color(red: 0.82, green: 0.67, blue: 0.42)
 
     static let textPrimary = cream
@@ -33,6 +34,7 @@ enum LoopDesign {
     static let title = Font.system(size: 14, weight: .medium)
     static let label = Font.system(size: 11, weight: .regular)
     static let detail = Font.system(size: 10, weight: .regular)
+    static let eyebrow = Font.system(size: 9, weight: .semibold)
     static let display = Font.system(size: 22, weight: .medium)
   }
 

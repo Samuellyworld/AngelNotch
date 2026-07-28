@@ -55,6 +55,21 @@ final class NotchCoordinator {
       }
       .store(in: &subscriptions)
 
+    model.settings.$enableCalendar
+      .dropFirst()
+      .sink { [weak self] enabled in
+        guard let self else { return }
+        if enabled {
+          model.calendar.start()
+        } else {
+          model.calendar.stop()
+          if model.selectedTab == .calendar {
+            model.selectedTab = .home
+          }
+        }
+      }
+      .store(in: &subscriptions)
+
     model.settings.$islandScale
       .combineLatest(model.settings.$animationSpeed)
       .dropFirst()
