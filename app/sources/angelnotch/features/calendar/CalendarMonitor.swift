@@ -28,9 +28,12 @@ struct UpcomingEvent: Identifiable, Equatable, Sendable {
 final class CalendarMonitor: ObservableObject {
   @Published private(set) var nextEvent: UpcomingEvent?
   @Published private(set) var authorizationStatus: EKAuthorizationStatus
+  @Published private(set) var isRequestingAccess = false
+  @Published private(set) var accessError: String?
 
   private let store = EKEventStore()
   private var monitorTask: Task<Void, Never>?
+  private var settingsRefreshTask: Task<Void, Never>?
 
   init() {
     authorizationStatus = EKEventStore.authorizationStatus(for: .event)
@@ -54,15 +57,45 @@ final class CalendarMonitor: ObservableObject {
   func stop() {
     monitorTask?.cancel()
     monitorTask = nil
+    settingsRefreshTask?.cancel()
+    settingsRefreshTask = nil
   }
 
   func requestAccess() {
-    store.requestFullAccessToEvents { [weak self] _, _ in
-      Task { @MainActor [weak self] in
-        guard let self else { return }
-        self.authorizationStatus = EKEventStore.authorizationStatus(for: .event)
-        self.refresh()
+    authorizationStatus = EKEventStore.authorizationStatus(for: .event)
+
+    switch authorizationStatus {
+    case .notDetermined:
+      guard !isRequestingAccess else { return }
+      isRequestingAccess = true
+      accessError = nil
+
+      // AngelNotch uses a non-activating panel. Bring the accessory app
+      // forward so macOS can present its Calendar consent sheet visibly.
+      NSApp.activate(ignoringOtherApps: true)
+      store.requestFullAccessToEvents { [weak self] granted, error in
+        Task { @MainActor [weak self] in
+          guard let self else { return }
+          self.isRequestingAccess = false
+          self.authorizationStatus = EKEventStore.authorizationStatus(for: .event)
+          self.refresh()
+
+          if !granted, self.authorizationStatus == .notDetermined {
+            self.accessError =
+              error?.localizedDescription
+              ?? "Calendar access could not be requested."
+          }
+        }
       }
+    case .denied, .writeOnly:
+      openCalendarSettings()
+    case .restricted:
+      accessError = "Calendar access is restricted on this Mac."
+    case .fullAccess:
+      accessError = nil
+      refresh()
+    @unknown default:
+      openCalendarSettings()
     }
   }
 
@@ -73,6 +106,7 @@ final class CalendarMonitor: ObservableObject {
       return
     }
 
+    accessError = nil
     let start = Date().addingTimeInterval(-2 * 60 * 60)
     let end = Date().addingTimeInterval(7 * 24 * 60 * 60)
     let predicate = store.predicateForEvents(
@@ -104,6 +138,32 @@ final class CalendarMonitor: ObservableObject {
   func joinNextEvent() {
     guard let url = nextEvent?.joinURL else { return }
     NSWorkspace.shared.open(url)
+  }
+
+  private func openCalendarSettings() {
+    guard
+      let url = URL(
+        string:
+          "x-apple.systempreferences:com.apple.preference.security?Privacy_Calendars"
+      ),
+      NSWorkspace.shared.open(url)
+    else {
+      accessError = "Open System Settings and allow AngelNotch under Calendars."
+      return
+    }
+
+    accessError = nil
+    settingsRefreshTask?.cancel()
+    settingsRefreshTask = Task { @MainActor [weak self] in
+      // System Settings changes do not invoke EventKit's request callback.
+      // Poll briefly so the panel updates as soon as the user grants access.
+      for _ in 0..<120 {
+        try? await Task.sleep(for: .seconds(1))
+        guard !Task.isCancelled, let self else { return }
+        self.refresh()
+        if self.canReadEvents { return }
+      }
+    }
   }
 
   private func meetingURL(for event: EKEvent) -> URL? {
