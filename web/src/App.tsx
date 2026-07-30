@@ -12,12 +12,15 @@ import { Nav } from "@/components/Nav/Nav";
 import { Privacy } from "@/components/Privacy/Privacy";
 import { QuickNav } from "@/components/QuickNav/QuickNav";
 import { Requirements } from "@/components/Requirements/Requirements";
+import { SmoothScroll } from "@/components/SmoothScroll/SmoothScroll";
 import { Workflow } from "@/components/Workflow/Workflow";
 import { Grain, SkipLink } from "@/styles/GlobalStyles";
 
 export function App() {
   return (
     <>
+      <SmoothScroll />
+
       <SkipLink href="#intro">
         Skip to content
       </SkipLink>
