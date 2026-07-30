@@ -99,15 +99,18 @@ export const QuickNavArrow = styled(Icon)`
     transform var(--dur-fast) var(--ease-out);
 `;
 
-export const QuickNavLink = styled.a<{ $open: boolean; $delay: number }>`
+export const QuickNavLink = styled.a<{ $active: boolean; $open: boolean; $delay: number }>`
   display: grid;
   grid-template-columns: 2rem 1fr auto;
   min-height: 2.65rem;
   flex: 1;
   align-items: center;
+  padding: 0 0.25rem;
   border-bottom: 1px solid var(--outline);
-  color: var(--ink-secondary);
+  background-color: transparent;
+  color: ${({ $active }) => ($active ? "var(--ink-primary)" : "var(--ink-secondary)")};
   font-size: 0.93rem;
+  font-weight: ${({ $active }) => ($active ? 500 : 400)};
   letter-spacing: -0.02em;
   opacity: ${({ $open }) => ($open ? 1 : 0)};
   transform: translateY(${({ $open }) => ($open ? 0 : "7px")});
@@ -117,9 +120,24 @@ export const QuickNavLink = styled.a<{ $open: boolean; $delay: number }>`
     opacity 280ms ease ${({ $delay }) => `${$delay}ms`},
     transform 420ms var(--ease-out) ${({ $delay }) => `${$delay}ms`};
 
-  &:hover,
+  ${QuickNavIndex},
+  ${QuickNavArrow} {
+    color: ${({ $active }) => ($active ? "var(--accent)" : undefined)};
+  }
+
+  ${QuickNavArrow} {
+    transform: none;
+  }
+
+  &:hover {
+    background-color: rgba(244, 238, 228, 0.035);
+    color: var(--ink-primary);
+  }
+
   &:focus-visible {
-    background: linear-gradient(90deg, rgba(232, 133, 97, 0.08), transparent 75%);
+    outline: 1px solid rgba(232, 133, 97, 0.35);
+    outline-offset: -1px;
+    background-color: rgba(232, 133, 97, 0.07);
     color: var(--ink-primary);
   }
 
@@ -132,7 +150,7 @@ export const QuickNavLink = styled.a<{ $open: boolean; $delay: number }>`
 
   &:hover ${QuickNavArrow},
   &:focus-visible ${QuickNavArrow} {
-    transform: translateX(3px);
+    transform: translateX(2px);
   }
 
   @media (prefers-reduced-motion: reduce) {
