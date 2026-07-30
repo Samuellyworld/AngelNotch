@@ -45,11 +45,13 @@ const easeOutExpo = (progress: number) => {
 
 export function QuickNav() {
   const [open, setOpen] = useState(false);
+  const [activeHref, setActiveHref] = useState<string>(ITEMS[0].href);
   const prefersReducedMotion = usePrefersReducedMotion();
   const rootRef = useRef<HTMLDivElement>(null);
   const toggleRef = useRef<HTMLButtonElement>(null);
   const scrollFrameRef = useRef<number | null>(null);
   const scrollDelayRef = useRef<number | null>(null);
+  const activeIndex = ITEMS.findIndex((item) => item.href === activeHref);
 
   const cancelPendingScroll = () => {
     if (scrollFrameRef.current !== null) {
@@ -100,8 +102,44 @@ export function QuickNav() {
     [],
   );
 
+  useEffect(() => {
+    let frame: number | null = null;
+
+    const updateActiveSection = () => {
+      frame = null;
+      const marker = window.innerHeight * 0.36;
+      let currentHref: string = ITEMS[0].href;
+
+      for (const item of ITEMS) {
+        const section = document.querySelector<HTMLElement>(item.href);
+        if (!section || section.getBoundingClientRect().top > marker) break;
+        currentHref = item.href;
+      }
+
+      setActiveHref((current) => (current === currentHref ? current : currentHref));
+    };
+
+    const scheduleUpdate = () => {
+      if (frame !== null) return;
+      frame = window.requestAnimationFrame(updateActiveSection);
+    };
+
+    scheduleUpdate();
+    window.addEventListener("scroll", scheduleUpdate, { passive: true });
+    window.addEventListener("resize", scheduleUpdate);
+    window.addEventListener("hashchange", scheduleUpdate);
+
+    return () => {
+      window.removeEventListener("scroll", scheduleUpdate);
+      window.removeEventListener("resize", scheduleUpdate);
+      window.removeEventListener("hashchange", scheduleUpdate);
+      if (frame !== null) window.cancelAnimationFrame(frame);
+    };
+  }, []);
+
   const finishAt = (target: HTMLElement, href: string) => {
     window.history.pushState(null, "", href);
+    setActiveHref(href);
 
     const hadTabIndex = target.hasAttribute("tabindex");
     if (!hadTabIndex) target.setAttribute("tabindex", "-1");
@@ -150,6 +188,7 @@ export function QuickNav() {
   const onItemClick = (event: ReactMouseEvent<HTMLAnchorElement>, href: string) => {
     event.preventDefault();
     cancelPendingScroll();
+    setActiveHref(href);
     setOpen(false);
 
     const delay = prefersReducedMotion ? 0 : 60;
@@ -165,24 +204,33 @@ export function QuickNav() {
         <QuickNavContent $open={open}>
           <QuickNavHeading>
             <QuickNavEyebrow>Site index</QuickNavEyebrow>
-            <QuickNavCount>{String(ITEMS.length).padStart(2, "0")}</QuickNavCount>
+            <QuickNavCount>
+              {String(activeIndex + 1).padStart(2, "0")} /{" "}
+              {String(ITEMS.length).padStart(2, "0")}
+            </QuickNavCount>
           </QuickNavHeading>
 
           <QuickNavLinks aria-label="Page sections">
-            {ITEMS.map((item, index) => (
-              <QuickNavLink
-                key={item.href}
-                href={item.href}
-                $open={open}
-                $delay={120 + index * 24}
-                tabIndex={open ? 0 : -1}
-                onClick={(event) => onItemClick(event, item.href)}
-              >
-                <QuickNavIndex>{String(index + 1).padStart(2, "0")}</QuickNavIndex>
-                <span>{item.label}</span>
-                <QuickNavArrow name="arrow" size={15} />
-              </QuickNavLink>
-            ))}
+            {ITEMS.map((item, index) => {
+              const active = item.href === activeHref;
+
+              return (
+                <QuickNavLink
+                  key={item.href}
+                  href={item.href}
+                  $active={active}
+                  $open={open}
+                  $delay={120 + index * 24}
+                  aria-current={active ? "location" : undefined}
+                  tabIndex={open ? 0 : -1}
+                  onClick={(event) => onItemClick(event, item.href)}
+                >
+                  <QuickNavIndex>{String(index + 1).padStart(2, "0")}</QuickNavIndex>
+                  <span>{item.label}</span>
+                  <QuickNavArrow name="arrow" size={15} />
+                </QuickNavLink>
+              );
+            })}
           </QuickNavLinks>
         </QuickNavContent>
       </QuickNavPanel>
