@@ -78,7 +78,7 @@ final class AppSettings: ObservableObject {
 
     autoExpandMedia =
       defaults.object(forKey: "features.autoExpandMedia") as? Bool
-      ?? true
+      ?? false
     enableClipboard =
       defaults.object(forKey: "features.clipboard") as? Bool
       ?? true
