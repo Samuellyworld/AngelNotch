@@ -63,7 +63,7 @@ export const FEATURES: Feature[] = [
     index: "04",
     title: "System controls",
     blurb:
-      "Volume, brightness, microphone state and audio output — without opening a single settings panel.",
+      "Control volume, brightness, microphone state and audio output without opening a single settings panel.",
     icon: "system",
     tint: "--violet",
     kind: "mockup",
@@ -75,7 +75,7 @@ export const FEATURES: Feature[] = [
     index: "05",
     title: "Live indicators",
     blurb:
-      "Battery, connected AirPods, camera and microphone use, and active calls — readable without opening anything.",
+      "See battery, connected AirPods, camera and microphone use, and active calls without opening anything.",
     icon: "pulse",
     tint: "--mint",
     kind: "capture",

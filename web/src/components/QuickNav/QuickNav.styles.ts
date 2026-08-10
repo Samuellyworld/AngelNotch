@@ -418,22 +418,6 @@ export const QuickNavToggle = styled.button<{ $open: boolean }>`
     border-color var(--dur-fast) ease,
     background-color var(--dur-fast) ease;
 
-  &::after {
-    position: absolute;
-    right: 7px;
-    bottom: 7px;
-    width: 4px;
-    height: 4px;
-    border-radius: 50%;
-    background: var(--accent);
-    content: "";
-    opacity: ${({ $open }) => ($open ? 0 : 1)};
-    transform: ${({ $open }) => ($open ? "scale(0)" : "none")};
-    transition:
-      transform 500ms var(--ease-out),
-      opacity 220ms ease;
-  }
-
   &:hover {
     border-color: ${({ $open }) => ($open ? "transparent" : "rgba(232, 133, 97, 0.52)")};
     background: ${({ $open }) => ($open ? "transparent" : "#151310")};

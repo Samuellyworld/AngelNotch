@@ -14,8 +14,8 @@ type Sequence = {
 const PASSES = [8, 4, 2, 1] as const;
 
 /**
- * Loads a numbered image sequence in widening passes — every 8th frame first,
- * then the gaps — so the hero becomes scrubbable after a fraction of the bytes
+ * Loads a numbered image sequence in widening passes, starting with every 8th frame
+ * before filling the gaps, so the hero becomes scrubbable after a fraction of the bytes
  * have arrived and sharpens as the rest land. Images are decoded off the main
  * thread where the browser supports it, which keeps the first scroll smooth.
  */
