@@ -26,7 +26,7 @@ const PILLARS = [
   {
     index: "iii",
     title: "Private by design",
-    body: "Everything stays on the Mac. No account, no analytics, no advertising, no tracking SDKs.",
+    body: "App data stays on the Mac. No in-app account, analytics, advertising or tracking SDKs.",
   },
 ];
 

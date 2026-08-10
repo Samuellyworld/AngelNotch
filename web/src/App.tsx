@@ -1,5 +1,6 @@
 import { Extension } from "@/components/Extension/Extension";
 import { Cursor } from "@/components/Cursor/Cursor";
+import { DownloadGate } from "@/components/DownloadGate/DownloadGate";
 import { Faq } from "@/components/Faq/Faq";
 import { Features } from "@/components/Features/Features";
 import { FinalCta } from "@/components/FinalCta/FinalCta";
@@ -44,6 +45,7 @@ export function App() {
 
       <Footer />
       <Cursor />
+      <DownloadGate />
       <Grain aria-hidden="true" />
     </>
   );

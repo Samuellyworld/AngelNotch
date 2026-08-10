@@ -195,10 +195,10 @@ export const SHORTCUTS: Shortcut[] = [
 ];
 
 export const PRIVACY_CLAIMS = [
-  "No account",
-  "No analytics",
+  "No in-app account",
+  "No in-app analytics",
   "No advertising",
-  "No tracking SDKs",
+  "No in-app tracking SDKs",
   "No cloud clipboard",
 ] as const;
 
@@ -256,7 +256,11 @@ export const FAQS: Faq[] = [
   },
   {
     q: "Does AngelNotch require an account?",
-    a: "No. There is no sign-up, no login and no account of any kind.",
+    a: "No. The Mac app has no sign-up or login. The website asks for an email before download only so AngelNotch can send release notes and product updates; it does not create an app account.",
+  },
+  {
+    q: "What happens to my email when I download?",
+    a: "It is added to the AngelNotch product update list in Brevo. It is used for release notes and occasional product emails, and every message includes an unsubscribe option.",
   },
   {
     q: "Can I run it from source?",
