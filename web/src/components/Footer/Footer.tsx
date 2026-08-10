@@ -1,4 +1,5 @@
 import { Wordmark } from "@/components/icons";
+import { openDownloadGate } from "@/lib/downloadGate";
 import {
   AUTHOR_NAME,
   AUTHOR_URL,
@@ -79,8 +80,8 @@ export function Footer() {
                 {column.links.map((link) => (
                   <FooterLink
                     key={link.label}
-                    href={link.href}
-                    {...("download" in link && link.download ? { download: link.download } : {})}
+                    href={"download" in link ? "#download" : link.href}
+                    {...("download" in link ? { onClick: openDownloadGate } : {})}
                     {...("external" in link && link.external
                       ? { target: "_blank", rel: "noreferrer" }
                       : {})}

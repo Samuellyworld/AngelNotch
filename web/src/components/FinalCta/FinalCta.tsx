@@ -1,8 +1,7 @@
 import { Button } from "@/components/ui";
+import { openDownloadGate } from "@/lib/downloadGate";
 import {
-  DOWNLOAD_NAME,
   DOWNLOAD_SIZE,
-  DOWNLOAD_URL,
   MIN_MACOS,
   RELEASES_URL,
   REPO_URL,
@@ -32,7 +31,12 @@ export function FinalCta() {
           </CtaBody>
 
           <CtaButtons>
-            <Button href={DOWNLOAD_URL} download={DOWNLOAD_NAME} icon="download" meta={DOWNLOAD_SIZE}>
+            <Button
+              href="#download"
+              onClick={openDownloadGate}
+              icon="download"
+              meta={DOWNLOAD_SIZE}
+            >
               Download AngelNotch
             </Button>
             <Button

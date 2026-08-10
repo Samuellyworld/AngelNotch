@@ -2,7 +2,8 @@ import { useEffect, useRef, useState } from "react";
 
 import { Wordmark } from "@/components/icons";
 import { Button } from "@/components/ui";
-import { DOWNLOAD_NAME, DOWNLOAD_URL, REPO_URL } from "@/lib/site";
+import { openDownloadGate } from "@/lib/downloadGate";
+import { REPO_URL } from "@/lib/site";
 import {
   Actions,
   Brand,
@@ -71,7 +72,7 @@ export function Nav() {
             <StarLabel>Star</StarLabel>
           </StarLink>
 
-          <Button href={DOWNLOAD_URL} download={DOWNLOAD_NAME} size="small" icon="download">
+          <Button href="#download" onClick={openDownloadGate} size="small" icon="download">
             Download
           </Button>
         </Actions>

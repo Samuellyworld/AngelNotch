@@ -30,7 +30,9 @@ export function Privacy() {
 
             <PrivacyLede>
               AngelNotch is local-first. Clipboard history, saved file references, focus state and
-              integration data never leave the machine they were created on.
+              integration data never leave the machine they were created on. If you choose to
+              download from this website, your email is stored in Brevo for release notes and
+              product updates only.
             </PrivacyLede>
 
             <Claims>
