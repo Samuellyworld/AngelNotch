@@ -190,7 +190,11 @@ final class NotchCoordinator {
 
   private func movePanel(expanded: Bool, animated: Bool = false) {
     let screen = targetScreen()
-    let scale = CGFloat(model.settings.islandScale)
+    let preferredScale = CGFloat(model.settings.islandScale)
+    let scale =
+      expanded
+      ? preferredScale
+      : compactScale(preferredScale, for: screen)
     let size =
       expanded
       ? NSSize(
@@ -221,6 +225,22 @@ final class NotchCoordinator {
     } else {
       panel.setFrame(frame, display: true)
     }
+  }
+
+  /// Keeps the compact island inside the part of the display reserved for the
+  /// menu bar/notch. Without this cap, larger appearance scales let the panel
+  /// extend over the frontmost application's window.
+  private func compactScale(_ preferredScale: CGFloat, for screen: NSScreen)
+    -> CGFloat
+  {
+    let menuBarHeight = max(
+      screen.safeAreaInsets.top,
+      screen.frame.maxY - screen.visibleFrame.maxY
+    )
+    guard menuBarHeight > 0 else { return preferredScale }
+
+    let maximumScale = menuBarHeight / LoopDesign.Geometry.compactHeight
+    return min(preferredScale, maximumScale)
   }
 
   private func expandedHeight() -> CGFloat {
