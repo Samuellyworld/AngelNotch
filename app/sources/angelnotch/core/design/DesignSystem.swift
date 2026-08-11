@@ -37,7 +37,7 @@ enum LoopDesign {
   enum Geometry {
     static let compactHeight: CGFloat = 40
     // Leaves comfortable optical space around compact state icons.
-    static let compactMinimumWidth: CGFloat = 278
+    static let compactMinimumWidth: CGFloat = 324
     static let compactNotchPadding: CGFloat = 92
     static let expandedWidth: CGFloat = 548
     static let expandedHeight: CGFloat = 380
