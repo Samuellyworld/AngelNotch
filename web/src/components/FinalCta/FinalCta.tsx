@@ -1,7 +1,6 @@
 import { Button } from "@/components/ui";
 import { openDownloadGate } from "@/lib/downloadGate";
 import {
-  DOWNLOAD_SIZE,
   MIN_MACOS,
   RELEASES_URL,
   REPO_URL,
@@ -35,7 +34,7 @@ export function FinalCta() {
               href="#download"
               onClick={openDownloadGate}
               icon="download"
-              meta={DOWNLOAD_SIZE}
+              meta={MIN_MACOS}
             >
               Download AngelNotch
             </Button>

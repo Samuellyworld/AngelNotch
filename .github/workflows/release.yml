@@ -56,6 +56,11 @@ jobs:
             echo "Tag $RELEASE_TAG does not match app version $VERSION." >&2
             exit 1
           fi
+          WEB_VERSION="$(node -p 'require("./web/package.json").version')"
+          if [[ "$WEB_VERSION" != "$VERSION" ]]; then
+            echo "Website version $WEB_VERSION does not match app version $VERSION." >&2
+            exit 1
+          fi
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
       - name: Validate project
