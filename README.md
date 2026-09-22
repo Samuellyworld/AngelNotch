@@ -37,6 +37,8 @@ open it, and drag AngelNotch into the Applications folder.
 - See battery, camera, active-call, and model-aware connected-AirPods indicators.
 - Follow local activities such as Chrome download progress.
 - Adapt quick actions to the application currently in use.
+- Optionally unlock the macOS lock screen with on-device face recognition and
+  heavy liveness checks.
 
 ## Requirements
 
@@ -101,11 +103,24 @@ AngelNotch may request access when a related feature is used:
 | Calendar | Show the next event and its meeting link |
 | Call activity | Display an orange animated waveform while a call is active |
 | Camera | Display a camera-in-use indicator |
+| Accessibility | Type the locally encrypted Mac password after Face Unlock succeeds |
+| Touch ID | Protect the encryption key used for Face Unlock data and credentials |
 
 The call waveform is an activity indicator and does not capture microphone audio.
 AirPods battery progress is shown only when macOS publishes a real accessory
 battery value; otherwise the UI shows connection status without implying a battery
 percentage.
+
+### Face Unlock security notice
+
+Face Unlock is enabled by default but remains inactive until setup is completed. It
+is a convenience feature, not a security upgrade. Mac cameras do not have the depth
+sensors used by Face ID, so a convincing
+video may bypass camera-based liveness checks. macOS also has no API that lets a
+third-party app authorize login; after verifying the lock state, face match, and
+liveness result, AngelNotch enters a locally encrypted password through Accessibility.
+Camera frames are processed in memory and discarded. Face embeddings and the stored
+password are encrypted on-device behind a Touch ID/user-presence-protected key.
 
 ## Local data and privacy
 

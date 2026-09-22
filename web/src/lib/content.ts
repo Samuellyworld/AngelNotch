@@ -119,6 +119,16 @@ export const FEATURES: Feature[] = [
     tint: "--cream",
     kind: "mark",
   },
+  {
+    id: "face-unlock",
+    index: "10",
+    title: "Face Unlock",
+    blurb:
+      "Recognize your face and check liveness on-device, then unlock with a locally encrypted password.",
+    icon: "shield",
+    tint: "--mint",
+    kind: "mark",
+  },
 ];
 
 /** The four states the pinned hero scrubs through, keyed to frame positions in
@@ -200,6 +210,7 @@ export const PRIVACY_CLAIMS = [
   "No advertising",
   "No in-app tracking SDKs",
   "No cloud clipboard",
+  "No cloud biometrics",
 ] as const;
 
 export type Permission = { name: string; purpose: string; icon: IconName };
@@ -208,7 +219,21 @@ export const PERMISSIONS: Permission[] = [
   { name: "Automation", purpose: "Read and control Spotify or Apple Music", icon: "media" },
   { name: "Calendar", purpose: "Show the next event and its meeting link", icon: "calendar" },
   { name: "Microphone", purpose: "Display microphone and active-call status", icon: "pulse" },
-  { name: "Camera", purpose: "Display a camera-in-use indicator", icon: "shield" },
+  {
+    name: "Camera",
+    purpose: "Run optional on-device Face Unlock and show camera status",
+    icon: "shield",
+  },
+  {
+    name: "Accessibility",
+    purpose: "Enter your encrypted password after Face Unlock succeeds",
+    icon: "shield",
+  },
+  {
+    name: "Touch ID",
+    purpose: "Protect the local Face Unlock encryption key",
+    icon: "shield",
+  },
 ];
 
 export type Requirement = { label: string; detail: string; icon: IconName };
@@ -240,7 +265,11 @@ export const FAQS: Faq[] = [
   },
   {
     q: "Does it record my camera or microphone?",
-    a: "No. AngelNotch does not record, store, transcribe or transmit camera or microphone content. During a call it may sample local microphone amplitude only to draw the compact waveform.",
+    a: "No. Face Unlock camera frames are processed in memory and discarded. AngelNotch does not record, store, transcribe or transmit camera or microphone content. During a call it may sample local microphone amplitude only to draw the compact waveform.",
+  },
+  {
+    q: "Is Face Unlock as secure as Face ID?",
+    a: "No. Mac cameras lack Face ID depth sensors, so Face Unlock is a convenience feature and a convincing video may bypass its liveness checks. It is enabled by default but does nothing until you explicitly complete setup and grant permissions.",
   },
   {
     q: "Do I need the Chrome extension?",

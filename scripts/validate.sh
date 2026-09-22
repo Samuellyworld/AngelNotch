@@ -4,7 +4,12 @@ set -euo pipefail
 PROJECT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$PROJECT_DIR"
 
-swift build --package-path app --scratch-path .build
+
+SWIFT_BUILD_ARGS=(--package-path app --scratch-path .build)
+if [[ -n "${ANGELNOTCH_SDK_PATH:-}" ]]; then
+  SWIFT_BUILD_ARGS+=(--disable-sandbox --sdk "$ANGELNOTCH_SDK_PATH")
+fi
+swift build "${SWIFT_BUILD_ARGS[@]}"
 "$PROJECT_DIR/scripts/lint-app.sh"
 npm --prefix chrome-extension run check
 npm --prefix chrome-extension run build
@@ -20,6 +25,18 @@ if [[ "$(
     resources/AngelNotch.entitlements
 )" != "true" ]]; then
   echo "Calendar access requires the calendars code-signing entitlement." >&2
+  exit 1
+fi
+if [[ "$(
+  /usr/libexec/PlistBuddy \
+    -c "Print :com.apple.security.device.camera" \
+    resources/AngelNotch.entitlements
+)" != "true" ]]; then
+  echo "Face Unlock requires the camera code-signing entitlement." >&2
+  exit 1
+fi
+if [[ ! -s app/sources/angelnotch/resources/faceunlock/ArcFace.mlpackage/Data/com.apple.CoreML/weights/weight.bin ]]; then
+  echo "Missing Face Unlock Core ML model weights." >&2
   exit 1
 fi
 for voice_asset in \

@@ -45,7 +45,8 @@ final class NotchModel: ObservableObject {
   @Published var selectedTab: IslandTab = .home
   @Published private(set) var visibleHUD: SystemHUDEvent?
 
-  let settings = AppSettings()
+  let settings: AppSettings
+  let faceUnlock: FaceUnlockService
   let media = MediaMonitor()
   let clipboard = ClipboardHistoryStore()
   let files = FileShelfStore()
@@ -57,6 +58,12 @@ final class NotchModel: ObservableObject {
 
   private var collapseTask: Task<Void, Never>?
   private var hudTask: Task<Void, Never>?
+
+  init() {
+    let settings = AppSettings()
+    self.settings = settings
+    faceUnlock = FaceUnlockService(settings: settings)
+  }
 
   func startServices() {
     media.start()
@@ -71,6 +78,7 @@ final class NotchModel: ObservableObject {
       context.start()
     }
     activities.start()
+    faceUnlock.start()
   }
 
   func expand(tab: IslandTab? = nil) {

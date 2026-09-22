@@ -62,7 +62,7 @@ export function Features() {
       label="Features"
       title={
         <>
-          Nine small tools, <Serif>one small space.</Serif>
+          Ten small tools, <Serif>one small space.</Serif>
         </>
       }
       lede="Each one earns its place by saving a trip to another window. None of them needs an account, a subscription or a connection."

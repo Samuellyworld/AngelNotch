@@ -6,10 +6,12 @@ import UniformTypeIdentifiers
 struct NotchRootView: View {
   @ObservedObject var model: NotchModel
   @ObservedObject private var settings: AppSettings
+  @ObservedObject private var faceUnlock: FaceUnlockService
 
   init(model: NotchModel) {
     self.model = model
     settings = model.settings
+    faceUnlock = model.faceUnlock
   }
 
   var body: some View {
@@ -51,7 +53,8 @@ struct NotchRootView: View {
     RoundedRectangle(
       cornerRadius: model.isExpanded
         ? LoopDesign.Geometry.expandedRadius
-        : LoopDesign.Geometry.compactRadius,
+        : faceUnlockIsPresenting
+          ? 24 : LoopDesign.Geometry.compactRadius,
       style: .continuous
     )
     .fill(LoopDesign.Palette.canvas)
@@ -59,13 +62,21 @@ struct NotchRootView: View {
       RoundedRectangle(
         cornerRadius: model.isExpanded
           ? LoopDesign.Geometry.expandedRadius
-          : LoopDesign.Geometry.compactRadius,
+          : faceUnlockIsPresenting
+            ? 24 : LoopDesign.Geometry.compactRadius,
         style: .continuous
       )
       .strokeBorder(
         LoopDesign.Palette.outline.opacity(0.62),
         lineWidth: 0.5
       )
+    }
+  }
+
+  private var faceUnlockIsPresenting: Bool {
+    switch faceUnlock.phase {
+    case .scanning, .recognized: true
+    default: false
     }
   }
 }
@@ -77,6 +88,7 @@ private struct CompactIslandView: View {
   @ObservedObject var calendar: CalendarMonitor
   @ObservedObject var activities: LiveActivityCenter
   @ObservedObject var system: SystemMonitor
+  @ObservedObject var faceUnlock: FaceUnlockService
 
   init(model: NotchModel) {
     self.model = model
@@ -85,115 +97,147 @@ private struct CompactIslandView: View {
     calendar = model.calendar
     activities = model.activities
     system = model.system
+    faceUnlock = model.faceUnlock
   }
 
   var body: some View {
-    HStack {
-      if let hud = model.visibleHUD {
-        HUDCompactLeading(event: hud)
-      } else if system.snapshot.isCallActive {
-        CompactStateIcon(
-          symbol: "phone.fill",
-          color: LoopDesign.Palette.call,
-          help: "Call in progress"
-        )
-        .layoutPriority(2)
-      } else if focus.isRunning {
-        CompactStateIcon(
-          symbol: focus.phase == .focus
-            ? "timer"
-            : "cup.and.saucer.fill",
-          color: LoopDesign.Palette.accent,
-          help: focus.phase == .focus ? "Focus session" : "Break"
-        )
-        .layoutPriority(2)
-      } else if let item = media.snapshot {
-        MediaArtwork(
-          snapshot: item,
-          size: 25,
-          animated: item.isPlaying && !model.settings.enableReducedMotion,
-          tint: LoopDesign.Palette.accent
-        )
-      } else if let activity = activities.activities.first {
-        HStack(spacing: 6) {
-          Circle()
-            .fill(LoopDesign.Palette.accent)
-            .frame(width: 5, height: 5)
-          Text(activity.title)
-            .font(LoopDesign.TypeStyle.detail)
-            .foregroundStyle(LoopDesign.Palette.textSecondary)
-            .lineLimit(1)
-        }
-      } else if let event = calendar.nextEvent {
-        HStack(spacing: 6) {
-          CompactStateLabel(
-            text: event.isInProgress ? "NOW" : "NEXT",
-            color: LoopDesign.Palette.coral
+    Group {
+      if showsFaceUnlockStatus {
+        VStack(spacing: 0) {
+          Color.clear.frame(height: 34)
+          FaceUnlockCompactStatus(
+            phase: faceUnlock.phase,
+            reducedMotion: model.settings.enableReducedMotion
           )
-          Text(event.countdownLabel)
-            .font(LoopDesign.TypeStyle.label)
-            .foregroundStyle(LoopDesign.Palette.textSecondary)
+          .padding(.horizontal, 10)
+          .padding(.bottom, 6)
+          .transition(.opacity.combined(with: .scale(scale: 0.9)))
         }
       } else {
-        LoopMiniMark()
-      }
-
-      Spacer()
-
-      if let hud = model.visibleHUD {
-        HUDCompactTrailing(event: hud, model: model)
-      } else if system.snapshot.isCallActive {
-        CompactCallActivityButton(
-          color: LoopDesign.Palette.coral,
-          reducedMotion: model.settings.enableReducedMotion,
-          action: { model.expand(tab: .system) }
-        )
-      } else if focus.isRunning {
-        CompactProgressButton(
-          progress: focus.progress,
-          isRunning: focus.isRunning,
-          color: LoopDesign.Palette.accent,
-          help: focus.isRunning ? "Pause focus timer" : "Resume focus timer",
-          action: focus.toggleRunning
-        )
-      } else if let item = media.snapshot {
-        CompactPlaybackButton(
-          isPlaying: item.isPlaying,
-          color: item.source == .spotify
-            ? (item.isPlaying ? LoopDesign.Palette.spotify : LoopDesign.Palette.mint)
-            : LoopDesign.Palette.accent,
-          reducedMotion: model.settings.enableReducedMotion,
-          action: { media.send(.playPause) }
-        )
-      } else if let activity = activities.activities.first {
-        CompactActivityButton(
-          progress: activity.progress,
-          action: { model.expand(tab: .activities) }
-        )
-      } else if let event = calendar.nextEvent {
-        CompactIconButton(
-          symbol: event.joinURL == nil ? "calendar" : "video.fill",
-          color: LoopDesign.Palette.coral,
-          help: event.joinURL == nil ? "Open calendar" : "Join meeting",
-          action: {
-            if event.joinURL == nil {
-              model.expand(tab: .calendar)
-            } else {
-              calendar.joinNextEvent()
-            }
-          }
-        )
-      } else {
-        CompactIconButton(
-          symbol: "chevron.down",
-          color: LoopDesign.Palette.textSecondary,
-          help: "Open AngelNotch",
-          action: { model.expand() }
-        )
+        HStack {
+          leadingContent
+          Spacer()
+          trailingContent
+        }
+        .padding(.horizontal, 12)
       }
     }
-    .padding(.horizontal, 12)
     .frame(maxHeight: .infinity)
+    .animation(LoopDesign.Motion.morph, value: faceUnlock.phase)
+  }
+
+  private var showsFaceUnlockStatus: Bool {
+    switch faceUnlock.phase {
+    case .scanning, .recognized: true
+    default: false
+    }
+  }
+
+  @ViewBuilder
+  private var leadingContent: some View {
+    if let hud = model.visibleHUD {
+      HUDCompactLeading(event: hud)
+    } else if system.snapshot.isCallActive {
+      CompactStateIcon(
+        symbol: "phone.fill",
+        color: LoopDesign.Palette.call,
+        help: "Call in progress"
+      )
+      .layoutPriority(2)
+    } else if focus.isRunning {
+      CompactStateIcon(
+        symbol: focus.phase == .focus
+          ? "timer"
+          : "cup.and.saucer.fill",
+        color: LoopDesign.Palette.accent,
+        help: focus.phase == .focus ? "Focus session" : "Break"
+      )
+      .layoutPriority(2)
+    } else if let item = media.snapshot {
+      MediaArtwork(
+        snapshot: item,
+        size: 25,
+        animated: item.isPlaying && !model.settings.enableReducedMotion,
+        tint: LoopDesign.Palette.accent
+      )
+    } else if let activity = activities.activities.first {
+      HStack(spacing: 6) {
+        Circle()
+          .fill(LoopDesign.Palette.accent)
+          .frame(width: 5, height: 5)
+        Text(activity.title)
+          .font(LoopDesign.TypeStyle.detail)
+          .foregroundStyle(LoopDesign.Palette.textSecondary)
+          .lineLimit(1)
+      }
+    } else if let event = calendar.nextEvent {
+      HStack(spacing: 6) {
+        CompactStateLabel(
+          text: event.isInProgress ? "NOW" : "NEXT",
+          color: LoopDesign.Palette.coral
+        )
+        Text(event.countdownLabel)
+          .font(LoopDesign.TypeStyle.label)
+          .foregroundStyle(LoopDesign.Palette.textSecondary)
+      }
+    } else {
+      LoopMiniMark()
+    }
+  }
+
+  @ViewBuilder
+  private var trailingContent: some View {
+    if let hud = model.visibleHUD {
+      HUDCompactTrailing(event: hud, model: model)
+    } else if system.snapshot.isCallActive {
+      CompactCallActivityButton(
+        color: LoopDesign.Palette.coral,
+        reducedMotion: model.settings.enableReducedMotion,
+        action: { model.expand(tab: .system) }
+      )
+    } else if focus.isRunning {
+      CompactProgressButton(
+        progress: focus.progress,
+        isRunning: focus.isRunning,
+        color: LoopDesign.Palette.accent,
+        help: focus.isRunning ? "Pause focus timer" : "Resume focus timer",
+        action: focus.toggleRunning
+      )
+    } else if let item = media.snapshot {
+      CompactPlaybackButton(
+        isPlaying: item.isPlaying,
+        color: item.source == .spotify
+          ? (item.isPlaying ? LoopDesign.Palette.spotify : LoopDesign.Palette.mint)
+          : LoopDesign.Palette.accent,
+        reducedMotion: model.settings.enableReducedMotion,
+        action: { media.send(.playPause) }
+      )
+    } else if let activity = activities.activities.first {
+      CompactActivityButton(
+        progress: activity.progress,
+        action: { model.expand(tab: .activities) }
+      )
+    } else if let event = calendar.nextEvent {
+      CompactIconButton(
+        symbol: event.joinURL == nil ? "calendar" : "video.fill",
+        color: LoopDesign.Palette.coral,
+        help: event.joinURL == nil ? "Open calendar" : "Join meeting",
+        action: {
+          if event.joinURL == nil {
+            model.expand(tab: .calendar)
+          } else {
+            calendar.joinNextEvent()
+          }
+        }
+      )
+    } else {
+      CompactIconButton(
+        symbol: "chevron.down",
+        color: LoopDesign.Palette.textSecondary,
+        help: "Open AngelNotch",
+        action: { model.expand() }
+      )
+    }
   }
 }
 
@@ -201,11 +245,13 @@ private struct ExpandedIslandView: View {
   @ObservedObject var model: NotchModel
   @ObservedObject var settings: AppSettings
   @ObservedObject var context: ContextMonitor
+  @ObservedObject var faceUnlock: FaceUnlockService
 
   init(model: NotchModel) {
     self.model = model
     settings = model.settings
     context = model.context
+    faceUnlock = model.faceUnlock
   }
 
   var body: some View {
@@ -237,6 +283,11 @@ private struct ExpandedIslandView: View {
       }
 
       Spacer()
+
+      if case .recognized = faceUnlock.phase {
+        FaceUnlockHeaderBadge(reducedMotion: settings.enableReducedMotion)
+          .transition(.opacity.combined(with: .scale(scale: 0.86)))
+      }
 
       if model.settings.enableContextModes {
         Text(context.mode.title)
@@ -566,6 +617,184 @@ private struct HUDCompactLeading: View {
     case .airPodsConnected: LoopDesign.Palette.call
     default: LoopDesign.Palette.accent
     }
+  }
+}
+
+private struct FaceUnlockCompactStatus: View {
+  let phase: FaceUnlockPhase
+  let reducedMotion: Bool
+
+  private var succeeded: Bool {
+    if case .recognized = phase { return true }
+    return false
+  }
+
+  var body: some View {
+    HStack(spacing: 9) {
+      FaceUnlockAnimatedGlyph(succeeded: succeeded, reducedMotion: reducedMotion)
+
+      Text(succeeded ? "Face unlocked" : "Looking for you…")
+        .font(.system(size: 11, weight: .semibold))
+        .foregroundStyle(succeeded ? LoopDesign.Palette.mint : LoopDesign.Palette.textPrimary)
+        .lineLimit(1)
+
+      if succeeded {
+        Image(systemName: "checkmark.circle.fill")
+          .font(.system(size: 16, weight: .semibold))
+          .foregroundStyle(LoopDesign.Palette.mint)
+          .transition(.scale(scale: 0.45).combined(with: .opacity))
+      } else {
+        FaceUnlockActivityDots(reducedMotion: reducedMotion)
+          .transition(.opacity)
+      }
+    }
+    .padding(.horizontal, 13)
+    .frame(maxWidth: .infinity, minHeight: 32)
+    .background(
+      (succeeded ? LoopDesign.Palette.mint : LoopDesign.Palette.accent).opacity(0.08),
+      in: Capsule()
+    )
+    .overlay {
+      Capsule()
+        .strokeBorder(
+          (succeeded ? LoopDesign.Palette.mint : LoopDesign.Palette.accent).opacity(0.22),
+          lineWidth: 0.7
+        )
+    }
+    .shadow(
+      color: (succeeded ? LoopDesign.Palette.mint : LoopDesign.Palette.accent).opacity(0.16),
+      radius: succeeded ? 10 : 6
+    )
+    .accessibilityElement(children: .ignore)
+    .accessibilityLabel(succeeded ? "Face Unlock succeeded" : "Face Unlock is scanning")
+    .animation(LoopDesign.Motion.morph, value: succeeded)
+  }
+}
+
+private struct FaceUnlockAnimatedGlyph: View {
+  let succeeded: Bool
+  let reducedMotion: Bool
+  @State private var rotating = false
+  @State private var pulsing = false
+
+  var body: some View {
+    ZStack {
+      Circle()
+        .fill(
+          (succeeded ? LoopDesign.Palette.mint : LoopDesign.Palette.accent).opacity(
+            succeeded ? 0.18 : 0.10)
+        )
+
+      if !succeeded {
+        Circle()
+          .trim(from: 0.08, to: 0.76)
+          .stroke(
+            AngularGradient(
+              colors: [
+                LoopDesign.Palette.accent.opacity(0.14),
+                LoopDesign.Palette.accent,
+                LoopDesign.Palette.cream.opacity(0.9),
+                LoopDesign.Palette.accent.opacity(0.14),
+              ],
+              center: .center
+            ),
+            style: StrokeStyle(lineWidth: 1.5, lineCap: .round)
+          )
+          .rotationEffect(.degrees(rotating ? 360 : 0))
+      }
+
+      Image(systemName: succeeded ? "faceid" : "viewfinder")
+        .font(.system(size: 12, weight: .semibold))
+        .foregroundStyle(succeeded ? LoopDesign.Palette.mint : LoopDesign.Palette.cream)
+        .scaleEffect(pulsing ? 1.06 : 0.92)
+    }
+    .frame(width: 25, height: 25)
+    .overlay(alignment: .bottomTrailing) {
+      if succeeded {
+        Image(systemName: "checkmark")
+          .font(.system(size: 6.5, weight: .black))
+          .foregroundStyle(LoopDesign.Palette.canvas)
+          .frame(width: 10, height: 10)
+          .background(LoopDesign.Palette.mint, in: Circle())
+          .transition(.scale(scale: 0.2).combined(with: .opacity))
+      }
+    }
+    .onAppear {
+      guard !reducedMotion else {
+        rotating = true
+        pulsing = true
+        return
+      }
+      withAnimation(.linear(duration: 1.2).repeatForever(autoreverses: false)) {
+        rotating = true
+      }
+      withAnimation(.easeInOut(duration: 0.72).repeatForever(autoreverses: true)) {
+        pulsing = true
+      }
+    }
+    .animation(LoopDesign.Motion.morph, value: succeeded)
+  }
+}
+
+private struct FaceUnlockActivityDots: View {
+  let reducedMotion: Bool
+  @State private var active = false
+
+  var body: some View {
+    HStack(spacing: 3) {
+      ForEach(0..<3, id: \.self) { index in
+        Circle()
+          .fill(LoopDesign.Palette.accent)
+          .frame(width: 4, height: 4)
+          .scaleEffect(active ? 1 : 0.55)
+          .opacity(active ? 0.95 : 0.28)
+          .animation(
+            reducedMotion
+              ? nil
+              : .easeInOut(duration: 0.55)
+                .repeatForever(autoreverses: true)
+                .delay(Double(index) * 0.14),
+            value: active
+          )
+      }
+    }
+    .onAppear { active = true }
+    .accessibilityHidden(true)
+  }
+}
+
+private struct FaceUnlockHeaderBadge: View {
+  let reducedMotion: Bool
+  @State private var appeared = false
+
+  var body: some View {
+    HStack(spacing: 5) {
+      Image(systemName: "faceid")
+        .font(.system(size: 11, weight: .semibold))
+      Text("Unlocked")
+        .font(.system(size: 9, weight: .semibold))
+      Image(systemName: "checkmark")
+        .font(.system(size: 7, weight: .black))
+    }
+    .foregroundStyle(LoopDesign.Palette.mint)
+    .padding(.horizontal, 9)
+    .frame(height: 24)
+    .background(LoopDesign.Palette.mint.opacity(0.10), in: Capsule())
+    .overlay {
+      Capsule().strokeBorder(LoopDesign.Palette.mint.opacity(0.22), lineWidth: 0.7)
+    }
+    .scaleEffect(appeared ? 1 : 0.78)
+    .opacity(appeared ? 1 : 0)
+    .onAppear {
+      if reducedMotion {
+        appeared = true
+      } else {
+        withAnimation(.spring(response: 0.32, dampingFraction: 0.72)) {
+          appeared = true
+        }
+      }
+    }
+    .accessibilityLabel("Face Unlock succeeded")
   }
 }
 

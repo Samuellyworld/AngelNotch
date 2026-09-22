@@ -70,7 +70,7 @@ export function Gallery() {
   return (
     <GallerySection
       id="gallery"
-      index="03"
+      index="04"
       label="Gallery"
       title={
         <>

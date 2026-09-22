@@ -20,7 +20,7 @@ import {
 
 export function Privacy() {
   return (
-    <Section id="privacy" index="05" label="Privacy">
+    <Section id="privacy" index="06" label="Privacy">
       <PrivacyCard>
         <PrivacyGrid>
           <div>
