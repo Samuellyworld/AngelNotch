@@ -16,7 +16,6 @@ export const MIN_MACOS = "macOS 14";
 /** The release workflow refreshes this stable asset on every tagged release. */
 export const DOWNLOAD_URL = `${REPO_URL}/releases/latest/download/AngelNotch-macos.dmg`;
 export const DOWNLOAD_NAME = "AngelNotch-macos.dmg";
-export const DOWNLOAD_SIZE = "1.4 MB";
 
 /** Hero frame sequence dimensions and frame counts. */
 export const FRAME_COUNT = 65;
