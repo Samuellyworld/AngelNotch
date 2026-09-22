@@ -4,6 +4,7 @@ set -euo pipefail
 PROJECT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$PROJECT_DIR"
 
+
 SWIFT_BUILD_ARGS=(--package-path app --scratch-path .build)
 if [[ -n "${ANGELNOTCH_SDK_PATH:-}" ]]; then
   SWIFT_BUILD_ARGS+=(--disable-sandbox --sdk "$ANGELNOTCH_SDK_PATH")

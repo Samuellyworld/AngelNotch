@@ -9,6 +9,7 @@ SWIFT_BUILD_DIR="$PROJECT_DIR/.build"
 
 cd "$PROJECT_DIR"
 
+
 # Build products are not installed applications, so keep them in a hidden
 # staging directory that Spotlight does not present as a second AngelNotch.
 mkdir -p "$PROJECT_DIR/dist/.build"
@@ -40,7 +41,6 @@ install -m 755 \
   "$SWIFT_BUILD_DIR/release/AngelNotchNativeHost" \
   "$CONTENTS_DIR/MacOS/AngelNotchNativeHost"
 install -m 644 "resources/info.plist" "$CONTENTS_DIR/Info.plist"
-install -m 644 "THIRD_PARTY_NOTICES.md" "$CONTENTS_DIR/Resources/THIRD_PARTY_NOTICES.md"
 install -m 644 \
   "resources/app-icon.icns" \
   "$CONTENTS_DIR/Resources/AngelNotchMark.icns"
