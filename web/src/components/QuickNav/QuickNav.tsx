@@ -37,6 +37,7 @@ const ITEMS = [
   { href: "#top", label: "Home" },
   { href: "#intro", label: "Overview" },
   { href: "#features", label: "Features" },
+  { href: "#face-unlock", label: "Face Unlock" },
   { href: "#gallery", label: "Gallery" },
   { href: "#workflow", label: "Workflow" },
   { href: "#privacy", label: "Privacy" },

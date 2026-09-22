@@ -13,7 +13,7 @@ export function Requirements() {
   return (
     <Section
       id="requirements"
-      index="06"
+      index="07"
       label="Requirements"
       title={
         <>

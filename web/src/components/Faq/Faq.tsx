@@ -60,7 +60,7 @@ export function Faq() {
   return (
     <Section
       id="faq"
-      index="07"
+      index="08"
       label="FAQ"
       title={
         <>

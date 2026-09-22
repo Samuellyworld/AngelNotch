@@ -40,6 +40,15 @@ final class NotchCoordinator {
       }
       .store(in: &subscriptions)
 
+    model.faceUnlock.$phase
+      .removeDuplicates()
+      .dropFirst()
+      .sink { [weak self] phase in
+        guard let self, !model.isExpanded else { return }
+        movePanel(expanded: false, animated: true, faceUnlockPhase: phase)
+      }
+      .store(in: &subscriptions)
+
     model.settings.$islandScale
       .combineLatest(model.settings.$animationSpeed)
       .dropFirst()
@@ -88,6 +97,13 @@ final class NotchCoordinator {
         } else {
           model.context.stop()
         }
+      }
+      .store(in: &subscriptions)
+
+    model.settings.$enableFaceUnlock
+      .dropFirst()
+      .sink { [weak self] _ in
+        self?.model.faceUnlock.updateEnabledState()
       }
       .store(in: &subscriptions)
 
@@ -157,7 +173,8 @@ final class NotchCoordinator {
     let view = AngelNotchSettingsView(
       settings: model.settings,
       focus: model.focus,
-      files: model.files
+      files: model.files,
+      faceUnlock: model.faceUnlock
     )
     let controller = NSHostingController(rootView: view)
     let window = NSWindow(contentViewController: controller)
@@ -188,7 +205,11 @@ final class NotchCoordinator {
     hotKeys.registerDefaults()
   }
 
-  private func movePanel(expanded: Bool, animated: Bool = false) {
+  private func movePanel(
+    expanded: Bool,
+    animated: Bool = false,
+    faceUnlockPhase: FaceUnlockPhase? = nil
+  ) {
     let screen = targetScreen()
     let preferredScale = CGFloat(model.settings.islandScale)
     let scale =
@@ -203,7 +224,7 @@ final class NotchCoordinator {
       )
       : NSSize(
         width: compactWidth(for: screen) * scale,
-        height: LoopDesign.Geometry.compactHeight * scale
+        height: compactHeight(for: faceUnlockPhase ?? model.faceUnlock.phase) * scale
       )
 
     let origin = NSPoint(
@@ -248,6 +269,13 @@ final class NotchCoordinator {
       return LoopDesign.Geometry.mediaExpandedHeight
     }
     return LoopDesign.Geometry.expandedHeight
+  }
+
+  private func compactHeight(for phase: FaceUnlockPhase) -> CGFloat {
+    switch phase {
+    case .scanning, .recognized: LoopDesign.Geometry.faceUnlockCompactHeight
+    default: LoopDesign.Geometry.compactHeight
+    }
   }
 
   private func targetScreen() -> NSScreen {

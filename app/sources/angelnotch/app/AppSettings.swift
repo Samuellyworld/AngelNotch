@@ -58,6 +58,9 @@ final class AppSettings: ObservableObject {
   @Published var enableContextModes: Bool {
     didSet { defaults.set(enableContextModes, forKey: "features.contextModes") }
   }
+  @Published var enableFaceUnlock: Bool {
+    didSet { defaults.set(enableFaceUnlock, forKey: "features.faceUnlock") }
+  }
   @Published var enableReducedMotion: Bool {
     didSet { defaults.set(enableReducedMotion, forKey: "appearance.reducedMotion") }
   }
@@ -90,6 +93,9 @@ final class AppSettings: ObservableObject {
       ?? true
     enableContextModes =
       defaults.object(forKey: "features.contextModes") as? Bool
+      ?? true
+    enableFaceUnlock =
+      defaults.object(forKey: "features.faceUnlock") as? Bool
       ?? true
     enableReducedMotion =
       defaults.object(
@@ -131,6 +137,8 @@ struct AngelNotchSettingsView: View {
   @ObservedObject var settings: AppSettings
   @ObservedObject var focus: FocusTimer
   @ObservedObject var files: FileShelfStore
+  @ObservedObject var faceUnlock: FaceUnlockService
+  @State private var showsFaceUnlockSetup = false
 
   var body: some View {
     Form {
@@ -193,6 +201,38 @@ struct AngelNotchSettingsView: View {
         Toggle("Expand for track changes", isOn: $settings.autoExpandMedia)
       }
 
+      Section("Face Unlock") {
+        Toggle(
+          "Unlock at the lock screen",
+          isOn: Binding(
+            get: { settings.enableFaceUnlock },
+            set: { enabled in
+              if enabled, !faceUnlock.isReady {
+                showsFaceUnlockSetup = true
+              } else {
+                settings.enableFaceUnlock = enabled
+                faceUnlock.updateEnabledState()
+              }
+            }
+          )
+        )
+        Text("Convenience feature only. A Mac camera is not as secure as Face ID or Touch ID.")
+          .font(.caption)
+          .foregroundStyle(.secondary)
+
+        HStack {
+          Button(faceUnlock.isReady ? "Manage…" : "Set Up…") {
+            showsFaceUnlockSetup = true
+          }
+          if faceUnlock.hasStoredPassword || !FaceEnrollmentStore.shared.identities.isEmpty {
+            Button("Remove data", role: .destructive) {
+              faceUnlock.removeFaceUnlockData()
+            }
+          }
+        }
+        LabeledContent("Status", value: faceUnlock.phase.label)
+      }
+
       Section("Focus timer") {
         Toggle(
           "Announce with the Idera voice",
@@ -237,5 +277,8 @@ struct AngelNotchSettingsView: View {
     .padding()
     .frame(width: 500, height: 680)
     .preferredColorScheme(.dark)
+    .sheet(isPresented: $showsFaceUnlockSetup) {
+      FaceUnlockSetupView(service: faceUnlock, settings: settings)
+    }
   }
 }

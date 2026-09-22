@@ -15,7 +15,8 @@ let package = Package(
     .executableTarget(
       name: "AngelNotch",
       dependencies: ["AngelNotchServiceBridge"],
-      path: "sources/angelnotch"
+      path: "sources/angelnotch",
+      exclude: ["resources"]
     ),
     .target(
       name: "AngelNotchServiceBridge",

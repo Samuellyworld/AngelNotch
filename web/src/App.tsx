@@ -3,6 +3,7 @@ import { Cursor } from "@/components/Cursor/Cursor";
 import { DownloadGate } from "@/components/DownloadGate/DownloadGate";
 import { Faq } from "@/components/Faq/Faq";
 import { Features } from "@/components/Features/Features";
+import { FaceUnlock } from "@/components/FaceUnlock/FaceUnlock";
 import { FinalCta } from "@/components/FinalCta/FinalCta";
 import { Footer } from "@/components/Footer/Footer";
 import { Gallery } from "@/components/Gallery/Gallery";
@@ -34,6 +35,7 @@ export function App() {
         <Intro />
         <Marquee />
         <Features />
+        <FaceUnlock />
         <Gallery />
         <Workflow />
         <Privacy />

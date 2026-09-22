@@ -58,6 +58,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     )
     settingsItem.target = self
     menu.addItem(settingsItem)
+
+    let authorizeFaceUnlockItem = NSMenuItem(
+      title: "Authorize Face Unlock…",
+      action: #selector(authorizeFaceUnlock),
+      keyEquivalent: ""
+    )
+    authorizeFaceUnlockItem.target = self
+    menu.addItem(authorizeFaceUnlockItem)
     menu.addItem(.separator())
 
     let quitItem = NSMenuItem(
@@ -82,5 +90,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
   @objc private func showSettings() {
     coordinator?.openSettings()
+  }
+
+  @objc private func authorizeFaceUnlock() {
+    guard let coordinator else { return }
+    if coordinator.model.settings.enableFaceUnlock {
+      Task { _ = await coordinator.model.faceUnlock.authorizeSession() }
+    } else {
+      coordinator.openSettings()
+    }
   }
 }

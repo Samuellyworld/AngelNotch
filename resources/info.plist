@@ -33,6 +33,6 @@
   <key>NSCalendarsFullAccessUsageDescription</key>
   <string>AngelNotch shows your next event and provides a one-click meeting join button.</string>
   <key>NSCameraUsageDescription</key>
-  <string>AngelNotch checks whether a camera is active to display a privacy indicator. It does not capture video.</string>
+  <string>AngelNotch uses the camera for optional on-device Face Unlock and to display the camera-in-use indicator. Face Unlock frames are processed in memory and are not saved.</string>
 </dict>
 </plist>

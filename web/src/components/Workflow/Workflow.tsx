@@ -20,7 +20,7 @@ export function Workflow() {
   return (
     <WorkflowSection
       id="workflow"
-      index="04"
+      index="05"
       label="In use"
       title={
         <>

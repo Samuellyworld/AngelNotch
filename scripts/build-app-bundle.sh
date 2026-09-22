@@ -13,10 +13,15 @@ cd "$PROJECT_DIR"
 # staging directory that Spotlight does not present as a second AngelNotch.
 mkdir -p "$PROJECT_DIR/dist/.build"
 
-swift build \
-  --package-path "$SWIFT_PACKAGE_DIR" \
-  --scratch-path "$SWIFT_BUILD_DIR" \
+SWIFT_BUILD_ARGS=(
+  --package-path "$SWIFT_PACKAGE_DIR"
+  --scratch-path "$SWIFT_BUILD_DIR"
   -c release
+)
+if [[ -n "${ANGELNOTCH_SDK_PATH:-}" ]]; then
+  SWIFT_BUILD_ARGS+=(--disable-sandbox --sdk "$ANGELNOTCH_SDK_PATH")
+fi
+swift build "${SWIFT_BUILD_ARGS[@]}"
 
 if [[ "$APP_DIR" != "$PROJECT_DIR/dist/.build/AngelNotch.app" ]]; then
   echo "Refusing to replace unexpected app path: $APP_DIR" >&2
@@ -26,6 +31,7 @@ fi
 rm -rf -- "$APP_DIR"
 mkdir -p \
   "$CONTENTS_DIR/MacOS" \
+  "$CONTENTS_DIR/Resources/faceunlock" \
   "$CONTENTS_DIR/Resources/media"
 install -m 755 \
   "$SWIFT_BUILD_DIR/release/AngelNotch" \
@@ -34,6 +40,7 @@ install -m 755 \
   "$SWIFT_BUILD_DIR/release/AngelNotchNativeHost" \
   "$CONTENTS_DIR/MacOS/AngelNotchNativeHost"
 install -m 644 "resources/info.plist" "$CONTENTS_DIR/Info.plist"
+install -m 644 "THIRD_PARTY_NOTICES.md" "$CONTENTS_DIR/Resources/THIRD_PARTY_NOTICES.md"
 install -m 644 \
   "resources/app-icon.icns" \
   "$CONTENTS_DIR/Resources/AngelNotchMark.icns"
@@ -41,6 +48,9 @@ install -m 644 \
   app/resources/media/focus-complete-idera.mp3 \
   app/resources/media/break-complete-idera.mp3 \
   "$CONTENTS_DIR/Resources/media/"
+ditto \
+  app/sources/angelnotch/resources/faceunlock/ArcFace.mlpackage \
+  "$CONTENTS_DIR/Resources/faceunlock/ArcFace.mlpackage"
 
 for executable in \
   "$CONTENTS_DIR/MacOS/AngelNotch" \
